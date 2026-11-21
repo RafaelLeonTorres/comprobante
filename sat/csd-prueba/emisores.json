@@ -1,0 +1,87 @@
+{
+  "descripcion": "Certificados de Sello Digital (CSD) de prueba del SAT. Son públicos y solo sirven para pruebas: no valen ante el SAT.",
+  "contrasena": "12345678a",
+  "fuente": "http://omawww.sat.gob.mx/tramitesyservicios/Paginas/documentos/Certificados_de_Prueba.zip",
+  "emisores": [
+    {
+      "rfc": "EKU9003173C9",
+      "nombre": "ESCUELA KEMPER URGATE",
+      "persona": "moral",
+      "codigoPostal": "42501",
+      "regimenFiscal": "601",
+      "archivo": "eku9003173c9"
+    },
+    {
+      "rfc": "H&E951128469",
+      "nombre": "HERRERIA & ELECTRICOS",
+      "persona": "moral",
+      "codigoPostal": "06002",
+      "regimenFiscal": "601",
+      "archivo": "hye951128469"
+    },
+    {
+      "rfc": "URE180429TM6",
+      "nombre": "UNIVERSIDAD ROBOTICA ESPAÑOLA",
+      "persona": "moral",
+      "codigoPostal": "86991",
+      "regimenFiscal": "601",
+      "archivo": "ure180429tm6"
+    },
+    {
+      "rfc": "XIA190128J61",
+      "nombre": "XENON INDUSTRIAL ARTICLES",
+      "persona": "moral",
+      "codigoPostal": "76343",
+      "regimenFiscal": "622",
+      "archivo": "xia190128j61"
+    },
+    {
+      "rfc": "L&O950913MSA",
+      "nombre": "LUCES & OBRAS",
+      "persona": "moral",
+      "codigoPostal": "60922",
+      "regimenFiscal": "626",
+      "archivo": "lyo950913msa"
+    },
+    {
+      "rfc": "WATM640917J45",
+      "nombre": "MARIA WATEMBER TORRES",
+      "persona": "fisica",
+      "codigoPostal": "43543",
+      "regimenFiscal": "612",
+      "archivo": "watm640917j45"
+    },
+    {
+      "rfc": "KICR630120NX3",
+      "nombre": "RODRIGO KITIA CASTRO",
+      "persona": "fisica",
+      "codigoPostal": "36246",
+      "regimenFiscal": "626",
+      "archivo": "kicr630120nx3"
+    },
+    {
+      "rfc": "FUNK671228PH6",
+      "nombre": "KARLA FUENTE NOLASCO",
+      "persona": "fisica",
+      "codigoPostal": "01160",
+      "regimenFiscal": "621",
+      "archivo": "funk671228ph6"
+    },
+    {
+      "rfc": "IAÑL750210963",
+      "nombre": "LUIS IAN ÑUZCO",
+      "persona": "fisica",
+      "codigoPostal": "82525",
+      "regimenFiscal": "608",
+      "archivo": "ianl750210963"
+    },
+    {
+      "rfc": "MISC491214B86",
+      "nombre": "CECILIA MIRANDA SANCHEZ",
+      "persona": "fisica",
+      "codigoPostal": "01010",
+      "regimenFiscal": "612",
+      "archivo": "misc491214b86"
+    }
+  ]
+}

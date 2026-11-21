@@ -1,0 +1,296 @@
+[
+    {
+        "archivo":  "esquemas/cfdv40.xsd",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd",
+        "descargado":  "2026-11-21",
+        "bytes":  50607,
+        "sha256":  "2489b5b535f5cbc6a6c2db6132620de1833f85372512d01deea62880e700e276"
+    },
+    {
+        "archivo":  "esquemas/catCFDI.xsd",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/catalogos/catCFDI.xsd",
+        "descargado":  "2026-11-21",
+        "bytes":  5984046,
+        "sha256":  "6c58936cb77576f839a4d7915953ceaf252b9eb9319f9458fe5bb67ae2bb0bb1"
+    },
+    {
+        "archivo":  "esquemas/tdCFDI.xsd",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/tipoDatos/tdCFDI/tdCFDI.xsd",
+        "descargado":  "2026-11-21",
+        "bytes":  7315,
+        "sha256":  "b3b81fe4017b95d5477f23a32f47e8b0571683cfddfff1330508c75e02b504cd"
+    },
+    {
+        "archivo":  "esquemas/TimbreFiscalDigitalv11.xsd",
+        "url":  "https://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd",
+        "descargado":  "2026-11-21",
+        "bytes":  4732,
+        "sha256":  "fb3d061fe9914500bef8beb3ea2e8722ee8a8224fa3af63643877a64c0ea05f7"
+    },
+    {
+        "archivo":  "xslt/cadenaoriginal_4_0.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/4/cadenaoriginal_4_0/cadenaoriginal_4_0.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  21324,
+        "sha256":  "b0559b380e73b850ca8a3da53b077a6051a09d87068d8d98e82dfd4acfba7565"
+    },
+    {
+        "archivo":  "xslt/utilerias.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/2/cadenaoriginal_2_0/utilerias.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  920,
+        "sha256":  "1f7e9c9c04b2239cdf0928e6471d4f48165535c4d4d3ea445ec310b65cdf6c2c"
+    },
+    {
+        "archivo":  "xslt/donat11.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/donat/donat11.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  994,
+        "sha256":  "608a65b07c5841857562026c244c81f9cf3ddd32ff1d28bebab347bb4230fee3"
+    },
+    {
+        "archivo":  "xslt/divisas.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/divisas/divisas.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  707,
+        "sha256":  "64e24ea80b61f6a48ab242875e66877a49449286140187a668aa88241464640e"
+    },
+    {
+        "archivo":  "xslt/implocal.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1827,
+        "sha256":  "f99e91c983b7a43b72dc41129afca7342a30e6e45de71b34f7d4e5b6154439d4"
+    },
+    {
+        "archivo":  "xslt/leyendasFisc.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/leyendasFiscales/leyendasFisc.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1410,
+        "sha256":  "1588e059a3fdfc29bcca4de27f99dcf52abbaa7d815f428f2353a3105f52328c"
+    },
+    {
+        "archivo":  "xslt/pfic.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/pfic/pfic.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1010,
+        "sha256":  "5f18f835cf6007e92b156ad4cc65ab9167becdcfb1742f6cd655fd2f173e8b1b"
+    },
+    {
+        "archivo":  "xslt/TuristaPasajeroExtranjero.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/TuristaPasajeroExtranjero/TuristaPasajeroExtranjero.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1931,
+        "sha256":  "5a65dd5bd8d340fdc547b92ff2797199a97674bf2c78feacb69186c91338a68b"
+    },
+    {
+        "archivo":  "xslt/nomina12.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/nomina/nomina12.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  17105,
+        "sha256":  "4130bdb7f62d0987caa5af754ca0704c9e2693e3b454adfff02ba6146d673a08"
+    },
+    {
+        "archivo":  "xslt/cfdiregistrofiscal.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/cfdiregistrofiscal/cfdiregistrofiscal.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  823,
+        "sha256":  "6f47783bfeafa3920cbb452a3adee0239efd2250c13b9d91d242930416d1dee2"
+    },
+    {
+        "archivo":  "xslt/pagoenespecie.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/pagoenespecie/pagoenespecie.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1484,
+        "sha256":  "685854e25f091ebcb95a4865a7df80630949b2f400e47676ff8dfa2f3019a404"
+    },
+    {
+        "archivo":  "xslt/aerolineas.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/aerolineas/aerolineas.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1912,
+        "sha256":  "b197afab9535802b04d5e614a2320c10b8b67180e97f120b51d7bb60e61e028d"
+    },
+    {
+        "archivo":  "xslt/valesdedespensa.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/valesdedespensa/valesdedespensa.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  2806,
+        "sha256":  "dff69b6c188c1332b6908936767050121571952a09b99f881c39e41773392b92"
+    },
+    {
+        "archivo":  "xslt/notariospublicos.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/notariospublicos/notariospublicos.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  11323,
+        "sha256":  "7d2609b4b2977ace634d022e83f49bb20534bf137d7bdba014a40ee4b85e1d21"
+    },
+    {
+        "archivo":  "xslt/vehiculousado.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/vehiculousado/vehiculousado.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  3029,
+        "sha256":  "683b2a66cfd07d67f3c19c48499692e648079d663475f2f04f14d37131a29235"
+    },
+    {
+        "archivo":  "xslt/servicioparcialconstruccion.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/servicioparcialconstruccion/servicioparcialconstruccion.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  2145,
+        "sha256":  "692f0470dd0fd57e4c6ea87012296b78d67c31b00c3120eaba446d29219b29e4"
+    },
+    {
+        "archivo":  "xslt/renovacionysustitucionvehiculos.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/renovacionysustitucionvehiculos/renovacionysustitucionvehiculos.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  6777,
+        "sha256":  "1cda351ecbe8c4ddb4c6bb6508e7ea9c36b11627317870f04939765274979aba"
+    },
+    {
+        "archivo":  "xslt/certificadodedestruccion.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/certificadodestruccion/certificadodedestruccion.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  2882,
+        "sha256":  "e4b09099c1453b47bb286a69b05e60d5a5bccaaac466a4a2aebf788601f69349"
+    },
+    {
+        "archivo":  "xslt/obrasarteantiguedades.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/arteantiguedades/obrasarteantiguedades.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1603,
+        "sha256":  "0823ab4e0ad86ffc6b674680981f4471a60c8ab72431b8dedacd08b1e61ba8e8"
+    },
+    {
+        "archivo":  "xslt/ComercioExterior11.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/ComercioExterior11/ComercioExterior11.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  7293,
+        "sha256":  "c96afd3f14e8c1802a653ffe71d7147f2f74eb4f5daf9e0b21afca0b2c80c7f7"
+    },
+    {
+        "archivo":  "xslt/ComercioExterior20.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/ComercioExterior20/ComercioExterior20.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  7039,
+        "sha256":  "b7540d6878c8d1e14b3d7f8a8bf3889dc03b0dfb6dfbfc6d6b30e27a094b8446"
+    },
+    {
+        "archivo":  "xslt/ine11.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/ine/ine11.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1966,
+        "sha256":  "4098bf77bfee89e870604b7bc96ba4bdb19df78341f5e0cbffdd094eb916bcad"
+    },
+    {
+        "archivo":  "xslt/iedu.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/iedu/iedu.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1244,
+        "sha256":  "ef5e7e6cc0666cfc67d0c41ad865c2a044947289013ca2add0f89dea7fde667f"
+    },
+    {
+        "archivo":  "xslt/ventavehiculos11.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/ventavehiculos/ventavehiculos11.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1864,
+        "sha256":  "77a103915ea66d6ade5a23e5db7e3c66467abf744acef5f9ac8cafdc16362c7d"
+    },
+    {
+        "archivo":  "xslt/detallista.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/detallista/detallista.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  2176,
+        "sha256":  "e09906ef78afc077aa3318ca87bf2469e8570f97299d2f0237a2bc81da1e5e12"
+    },
+    {
+        "archivo":  "xslt/ecc12.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/EstadoDeCuentaCombustible/ecc12.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  4122,
+        "sha256":  "ad76f5a5c726df61fe82c1db5e3a189b1026fa0cd87518ea225498e24f4014fb"
+    },
+    {
+        "archivo":  "xslt/consumodeCombustibles11.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/consumodecombustibles/consumodeCombustibles11.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  4192,
+        "sha256":  "f43a77f25aba6ea7ce48769a5c700d2edce78e75914fbe866eafdb816ac2a9c1"
+    },
+    {
+        "archivo":  "xslt/GastosHidrocarburos10.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/GastosHidrocarburos10/GastosHidrocarburos10.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  5930,
+        "sha256":  "dc295079d9884a2afec09d63819eb874b4bede35ca8d4fe713625d0973e78a6b"
+    },
+    {
+        "archivo":  "xslt/IngresosHidrocarburos.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/IngresosHidrocarburos10/IngresosHidrocarburos.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1647,
+        "sha256":  "8dc9fb24cb47162da3d6fb831a1aa57a12571986eb123adfad2471370d56c10f"
+    },
+    {
+        "archivo":  "xslt/CartaPorte20.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte20.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  27549,
+        "sha256":  "0f8fa95e65eaf1fbfaba34ee7c0b78396dd04c920b1b54facddd178fad55add5"
+    },
+    {
+        "archivo":  "xslt/Pagos20.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  9827,
+        "sha256":  "9277a0a5049fbd56e3123e6489ffb16f6ccfbca30943aa7dbd0f969f3b70bd0f"
+    },
+    {
+        "archivo":  "xslt/CartaPorte30.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte30.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  33207,
+        "sha256":  "3da384b7797ab037c0fc37d79716e0f4eb7704c6a585353aa2d73c6f76892e35"
+    },
+    {
+        "archivo":  "xslt/CartaPorte31.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte31.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  34063,
+        "sha256":  "6ef3db6a004a7b27014bf8f03b9762f337479f0694525b193eaa9e3ff058fa0f"
+    },
+    {
+        "archivo":  "xslt/hidrocarburospetroliferos.xslt",
+        "url":  "http://www.sat.gob.mx/sitio_internet/cfd/HidrocarburosPetro/hidrocarburospetroliferos.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  1208,
+        "sha256":  "b212b9df8119de4278a24d5258b27ac295746b7476cc6aef969a3ad1d6c55a4b"
+    },
+    {
+        "archivo":  "xslt/cadenaoriginal_TFD_1_1.xslt",
+        "url":  "https://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/cadenaoriginal_TFD_1_1.xslt",
+        "descargado":  "2026-11-21",
+        "bytes":  2340,
+        "sha256":  "d7807e936d5a768cec5dca7a35a8b6dd515287083ca9dd7424c1b722c4b0d5a6"
+    },
+    {
+        "archivo":  "origen/Certificados_de_Prueba.zip",
+        "url":  "http://omawww.sat.gob.mx/tramitesyservicios/Paginas/documentos/Certificados_de_Prueba.zip",
+        "descargado":  "2026-11-21",
+        "bytes":  457478,
+        "sha256":  "23563077528c1fefcf5d57ad5e2eed9fa51956fe821c97a5d4c54f32f2ebeb8a"
+    },
+    {
+        "archivo":  "origen/catCFDI_V_4_20261120.xls",
+        "url":  "http://omawww.sat.gob.mx/tramitesyservicios/Paginas/documentos/catCFDI_V_4_20261120.xls",
+        "descargado":  "2026-11-21",
+        "bytes":  48828416,
+        "sha256":  "b8c156b356d378ab1f31b319a74b8caf04267b33edf04c910b9715474af96571"
+    },
+    {
+        "archivo":  "origen/MatrizDeErrores_CFDI_v40_20260325.xls",
+        "url":  "http://omawww.sat.gob.mx/tramitesyservicios/Paginas/documentos/MatrizDeErrores_CFDI_v40_20260325.xls",
+        "descargado":  "2026-11-21",
+        "bytes":  454656,
+        "sha256":  "bdc350035c7ed720af5be15509e01d0bda7c12cec4ad9797b0c34f889c1140a7"
+    }
+]
