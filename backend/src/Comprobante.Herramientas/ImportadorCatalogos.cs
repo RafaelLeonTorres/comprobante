@@ -280,6 +280,7 @@ internal static class ImportadorCatalogos
         var opciones = new JsonSerializerOptions
         {
             WriteIndented = true,
+            NewLine = "\n",
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
         File.WriteAllText(Path.Combine(carpetaSalida, "version.json"), JsonSerializer.Serialize(documento, opciones) + "\n", new System.Text.UTF8Encoding(false));
