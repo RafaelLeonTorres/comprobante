@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.webp binary
+
+# Los archivos oficiales del SAT se guardan tal como salen del portal, byte por byte: así su SHA-256
+# de sat/fuentes.json sigue valiendo en cualquier sistema operativo.
+/sat/esquemas/** -text
+/sat/xslt/** -text
+/sat/csd-prueba/** binary

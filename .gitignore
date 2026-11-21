@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+
+# Node y Angular
+node_modules/
+frontend/.angular/
+frontend/dist/
+coverage/
+
+# Archivos del SAT que baja sat/descargar.ps1 y pesan decenas de MB: el Excel de catálogos, la matriz
+# de errores, el zip de certificados de prueba y los PDF. De ahí salen los CSV de sat/catalogos.
+/sat/origen/
+
+# Ejecutor local de comandos (solo existe en la computadora de desarrollo)
+/.runner/
+
+# Configuración local de Docker Compose
+.env
+
+# Editores y sistema operativo
+.idea/
+Thumbs.db
+.DS_Store
