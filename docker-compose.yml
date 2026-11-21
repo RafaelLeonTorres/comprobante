@@ -1,0 +1,89 @@
+# Comprobante en tres contenedores. El navegador solo habla con "web": la app y la API comparten origen.
+#   web  nginx con el build de Angular; manda /api al contenedor "api".
+#   api  ASP.NET Core 11; al iniciar aplica las migraciones y carga los catálogos del SAT si cambiaron.
+#   db   PostgreSQL 18, con los catálogos del SAT.
+# Sin configurar nada: `docker compose up -d --build --wait` y abre http://localhost:8081.
+# La configuración opcional (contraseña y puertos) sale de .env; ver .env.example.
+name: comprobante
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: comprobante
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-comprobante-dev}
+      POSTGRES_DB: comprobante
+    ports:
+      # Solo desde este equipo: para herramientas de base de datos y para correr la API fuera de Docker.
+      - "127.0.0.1:${DB_PORT:-5435}:5432"
+    volumes:
+      # Desde PostgreSQL 18, la imagen guarda los datos en un subdirectorio por versión de /var/lib/postgresql.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comprobante -d comprobante"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${API_ENVIRONMENT:-Production}
+      TZ: ${TZ:-America/Mexico_City}
+      # La API está detrás de nginx: toma la IP y el esquema reales de X-Forwarded-For y X-Forwarded-Proto.
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ConnectionStrings__Catalogos: "Host=db;Port=5432;Database=comprobante;Username=comprobante;Password=${POSTGRES_PASSWORD:-comprobante-dev}"
+    ports:
+      # Solo desde este equipo: para `npm start` (proxy.conf.json) y para probar la API directamente.
+      - "127.0.0.1:${API_PORT:-5081}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      # La primera vez, antes de responder, la API carga los catálogos del SAT (unos 15 s). Mientras tanto revisa
+      # cada 2 s, así `docker compose up --wait` no espera de más.
+      start_period: 60s
+      start_interval: 2s
+    develop:
+      # `docker compose watch` recompila la imagen cuando cambia el código.
+      watch:
+        - action: rebuild
+          path: ./backend/src
+          ignore:
+            - "**/bin"
+            - "**/obj"
+        - action: rebuild
+          path: ./sat/catalogos
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8081}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend/src
+        - action: rebuild
+          path: ./frontend/package.json
+        - action: rebuild
+          path: ./frontend/nginx.conf
+
+volumes:
+  pgdata:

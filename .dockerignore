@@ -1,0 +1,14 @@
+# Contexto de construcción de la API (la raíz del repositorio): solo hace falta backend/src, global.json y sat/.
+# La web se construye con su propio contexto (frontend/) y su propio .dockerignore.
+**/bin
+**/obj
+**/node_modules
+.git
+.github
+.runner
+.vs
+.env
+frontend
+backend/tests
+sat/origen
+**/TestResults
