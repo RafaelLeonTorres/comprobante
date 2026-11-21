@@ -5,6 +5,9 @@ using Comprobante.Api.Comprobantes;
 using Comprobante.Api.Errores;
 using Comprobante.Catalogos;
 using Comprobante.Core.Calculo;
+using Comprobante.Core.Generacion;
+using Comprobante.Core.Sello;
+using Comprobante.Core.Validacion;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +20,11 @@ if (builder.Configuration.GetValue("Catalogos:SembrarAlIniciar", true))
     builder.Services.AddHostedService<SembradoAlIniciar>();
 }
 
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ServicioCalculo>();
+builder.Services.AddSingleton<EmisoresDePrueba>();
+builder.Services.AddSingleton<ValidadorCfdi>();
+builder.Services.AddSingleton<ServicioGeneracion>();
 
 builder.Services.ConfigureHttpJsonOptions(opciones =>
     opciones.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);

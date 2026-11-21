@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="USD" Folio="7" Fecha="2026-11-20T18:05:09" Sello="Kd69IWso4FF6ac0AO85SDZTqIgsVQrJji71g4uD9OIUS6PvAJogw8f/foUObJQY9A0SIo1OgidFiGsE6vHjiW2RgQpnFE3hixFeYjGiNq0nGIgnF8QncjVQDf8mdrfwueEnFRbp2WUc0RCnkJuoeV8Usx0aBs4a3UNf3kLUQ/PqdCbFwgZvbXIt1umKV65Ukf6aBt/m8SI1kS0bHaSbxAiUd9+t4vvnMXV37Xx1aTsa6MGj7M5K9i3SKM9XiDUqC2/wYPs9T5Rq+QQJd4GHtWHeHOKn1UnuMYpm40aKtARoLiVgnoiFkb3a3Oxn4uqglEMW6QtVVXPh9yKZ23j5KHQ==" FormaPago="03" NoCertificado="30001000000500003431" Certificado="MIIFrTCCA5WgAwIBAgIUMzAwMDEwMDAwMDA1MDAwMDM0MzEwDQYJKoZIhvcNAQELBQAwggErMQ8wDQYDVQQDDAZBQyBVQVQxLjAsBgNVBAoMJVNFUlZJQ0lPIERFIEFETUlOSVNUUkFDSU9OIFRSSUJVVEFSSUExGjAYBgNVBAsMEVNBVC1JRVMgQXV0aG9yaXR5MSgwJgYJKoZIhvcNAQkBFhlvc2Nhci5tYXJ0aW5lekBzYXQuZ29iLm14MR0wGwYDVQQJDBQzcmEgY2VycmFkYSBkZSBjYWxpejEOMAwGA1UEEQwFMDYzNzAxCzAJBgNVBAYTAk1YMRkwFwYDVQQIDBBDSVVEQUQgREUgTUVYSUNPMREwDwYDVQQHDAhDT1lPQUNBTjERMA8GA1UELRMIMi41LjQuNDUxJTAjBgkqhkiG9w0BCQITFnJlc3BvbnNhYmxlOiBBQ0RNQS1TQVQwHhcNMjMwNTE4MTI0MjE0WhcNMjcwNTE4MTI0MjE0WjCB1DEmMCQGA1UEAxQdSEVSUkVSSUEgJiBFTEVDVFJJQ09TIFMgREUgQ1YxJjAkBgNVBCkUHUhFUlJFUklBICYgRUxFQ1RSSUNPUyBTIERFIENWMSYwJAYDVQQKFB1IRVJSRVJJQSAmIEVMRUNUUklDT1MgUyBERSBDVjElMCMGA1UELRQcSCZFOTUxMTI4NDY5IC8gVkFEQTgwMDkyN0RKMzEeMBwGA1UEBRMVIC8gVkFEQTgwMDkyN0hTUlNSTDA1MRMwEQYDVQQLEwpTdWN1cnNhbCAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqHjtcPT4v+K0jXrhGsx+8sSS1eJ9LxCnY3/qaodXPFEik04VtM6N5as4ECs88L5zSkg182dOynfOPWAtH8Iy4Tqs39WNvvOeyIAUSvcKBU3NJtJDG93z+Eb3ExIw6NJ1fVivLtFFxVHDiJR4aZMzWixqt+tHyaOdoJ4s1qEezDZRidn0LJGgi5f+Zi6wYh51IlhJipiH0b1r/tl8tdMMxpgIr2rHGKodg+OtT/JC1xZSqpsLWJrXobTWGIuzZTVvAMIqyYzyoQwhE7hF/gWwnrcQESZWiPdpMgxhTGtTId28lAVePY+i5fi0VkotqrMf7MbtFWXqrTzw+4x084l0KQIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkqhkiG9w0BAQsFAAOCAgEAdmYSUf2x1PaZ8lV2/xteUmmEBNULVIlr1l9l9RId111iymbJN8SrQmLh/8fvR8mR02iMOSQHI6330krcv8Xh/fs4U237kT62jfeezE9ZMtfbKnAxWbAJXyA6sAz2MbwJblLyA/m/NjuJirVEtTnOK8ARNrUwg2Mr1yKWjH3yi1Nx5qksYDvki7082hxA0EV7HxF6xoMFO6EGStdAoHd3m4T8VQ2hz392u35TiDair7CXA02eue7RIQLvT9BdJl2AcDdo2hLe8Pok5+HLJkLOre2akwoMttif8PZjAxIjwcecw7O+l4BOxeO8g5HGxjgvI9YMADptQxh6wh+uQhM2SFtVzM9un8JCIuxTzFA93yvoPswuZiMMMoDIv4Qa6mkI6I+BuaAVL5k6v8qSe9+EDSsNgdhIX4sg0Vyf5INxCv1uhqXcvfK55x9m0KNC2+pQR3aOKjwhFxoOqgsQ+shrhVU9MnYh18vKRwMcwJ+JNG9weEtpp+IP3VRg8ymx6YZaH3aUya8XGKefGOJvCDI0rP4CRJ31U+hPEj+RslE5qxpLHAYxvUG+0lN9gPreLXignsj1cIMlXeFjueqqmUxUYrXJpK+pF2TZId6INxHtBx2VUuDu/lvmkdKu0uqfE+LKwF9tgROF4ziI++RckYLscBmYFV4ZikhEfhkPnNYSGgc=" SubTotal="3930.89" Descuento="864.10" Moneda="USD" TipoCambio="17.4521" Total="3557.48" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="06002">
+  <cfdi:Emisor Rfc="H&amp;E951128469" Nombre="HERRERIA &amp; ELECTRICOS" RegimenFiscal="601" />
+  <cfdi:Receptor Rfc="L&amp;O950913MSA" Nombre="LUCES &amp; OBRAS" DomicilioFiscalReceptor="60922" RegimenFiscalReceptor="626" UsoCFDI="G03" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84111506" Cantidad="3.141649" ClaveUnidad="E48" Unidad="Unidad de servicio" Descripcion="Servicio por hora &amp; soporte" ValorUnitario="1230.00" Importe="3864.22827" Descuento="864.10" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="3000.12827" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="480.020523" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="43231500" NoIdentificacion="SKU-9981" Cantidad="2" ClaveUnidad="H87" Unidad="Pieza" Descripcion="Licencia de uso" ValorUnitario="33.333333" Importe="66.666666" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="66.666666" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="10.666667" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="490.69">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="3066.79" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="490.69" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+</cfdi:Comprobante>

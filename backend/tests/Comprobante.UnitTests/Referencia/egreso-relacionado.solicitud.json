@@ -1,0 +1,30 @@
+{
+  "serie": "E",
+  "folio": "45",
+  "fecha": "2026-11-18T10:15:30",
+  "formaPago": "03",
+  "metodoPago": "PUE",
+  "tipoDeComprobante": "E",
+  "emisor": { "rfc": "IAÑL750210963" },
+  "receptor": {
+    "rfc": "FUNK671228PH6",
+    "nombre": "KARLA FUENTE NOLASCO",
+    "domicilioFiscalReceptor": "01160",
+    "regimenFiscalReceptor": "621",
+    "usoCfdi": "G02"
+  },
+  "cfdiRelacionados": [
+    { "tipoRelacion": "01", "uuids": [ "5FB2822E-396D-4725-8521-CDC4BDD20CCF" ] }
+  ],
+  "conceptos": [
+    {
+      "claveProdServ": "84111506",
+      "claveUnidad": "E48",
+      "unidad": "Unidad de servicio",
+      "descripcion": "Devolución parcial del servicio",
+      "cantidad": 1,
+      "valorUnitario": 350.75,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.16 } ]
+    }
+  ]
+}

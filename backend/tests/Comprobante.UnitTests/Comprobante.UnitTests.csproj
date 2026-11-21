@@ -16,6 +16,11 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- XML, cadenas originales y solicitudes de referencia, hechos aparte con generar_referencia.py. -->
+  <ItemGroup>
+    <None Update="Referencia\*.xml;Referencia\*.txt;Referencia\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Comprobante.Core\Comprobante.Core.csproj" />
     <ProjectReference Include="..\..\src\Comprobante.Catalogos\Comprobante.Catalogos.csproj" />

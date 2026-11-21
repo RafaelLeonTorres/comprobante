@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Testcontainers.PostgreSql;
 
 namespace Comprobante.IntegrationTests;
@@ -16,13 +15,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        builder.ConfigureAppConfiguration((_, configuracion) => configuracion.AddInMemoryCollection(
-            new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:Catalogos"] = _postgres.GetConnectionString(),
-                // Sin el SQL de cada consulta en la salida de las pruebas.
-                ["Logging:LogLevel:Microsoft.EntityFrameworkCore"] = "Warning",
-            }));
+
+        // UseSetting y no ConfigureAppConfiguration: Program.cs lee la cadena de conexión antes de que se apliquen los
+        // delegados de ConfigureAppConfiguration, y la API acabaría conectándose a la base de desarrollo (localhost:5435).
+        builder.UseSetting("ConnectionStrings:Catalogos", _postgres.GetConnectionString());
+
+        // Sin el SQL de cada consulta en la salida de las pruebas.
+        builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore", "Warning");
     }
 
     public Task InitializeAsync() => _postgres.StartAsync();

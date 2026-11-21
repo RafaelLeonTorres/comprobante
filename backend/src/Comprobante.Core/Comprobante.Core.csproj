@@ -6,4 +6,20 @@
     <RootNamespace>Comprobante.Core</RootNamespace>
   </PropertyGroup>
 
+  <!-- Los archivos del SAT que usa el núcleo viajan dentro del ensamblado: los esquemas (XSD), los XSLT de la cadena
+       original, y los certificados de prueba con su llave (públicos). Así la librería funciona sin carpetas ni rutas, y
+       no se descarga nada en tiempo de ejecución. Los nombres lógicos conservan la carpeta: sat/esquemas/cfdv40.xsd. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\sat\esquemas\*.xsd" LogicalName="sat/esquemas/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\..\sat\xslt\*.xslt" LogicalName="sat/xslt/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\..\sat\csd-prueba\*.cer" LogicalName="sat/csd-prueba/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\..\sat\csd-prueba\*.key" LogicalName="sat/csd-prueba/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\..\sat\csd-prueba\emisores.json" LogicalName="sat/csd-prueba/emisores.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Comprobante.UnitTests" />
+    <InternalsVisibleTo Include="Comprobante.IntegrationTests" />
+  </ItemGroup>
+
 </Project>

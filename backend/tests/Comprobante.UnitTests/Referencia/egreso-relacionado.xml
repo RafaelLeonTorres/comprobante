@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="E" Folio="45" Fecha="2026-11-18T10:15:30" Sello="CDhIShcnzgMp71MnGvBcoEBZM8sNjhx/54h9RM3oKo8/rxWa+gvfM4X8WFHzrVfKNunQHTnwTCJ5VGgFl/RkYeeqepwDGVzEvzDYb7/jlcKgRxV3LiVQvz9v3ck2k4O/3njD8NunxVGT8+Y7jiaAszTH0VGEaB/ZEdkgqH5QFpQto9JqcBd6Vh5WNRCk9ZO3EUPGpk29PdEaFXfgB1+MJNoK9t4VpsA1seeROSQpppYZ63QTjY3a3oSfDvw/97AumG6kcgMgfFtUx84f8wfrxmWajwIPrszufEpZxW1MQgWllTg9M+xM4gf6Bs3rJEiBCV6p6mX5j5tDFWaZ92GAbA==" FormaPago="03" NoCertificado="30001000000500003449" Certificado="MIIFbjCCA1agAwIBAgIUMzAwMDEwMDAwMDA1MDAwMDM0NDkwDQYJKoZIhvcNAQELBQAwggErMQ8wDQYDVQQDDAZBQyBVQVQxLjAsBgNVBAoMJVNFUlZJQ0lPIERFIEFETUlOSVNUUkFDSU9OIFRSSUJVVEFSSUExGjAYBgNVBAsMEVNBVC1JRVMgQXV0aG9yaXR5MSgwJgYJKoZIhvcNAQkBFhlvc2Nhci5tYXJ0aW5lekBzYXQuZ29iLm14MR0wGwYDVQQJDBQzcmEgY2VycmFkYSBkZSBjYWxpejEOMAwGA1UEEQwFMDYzNzAxCzAJBgNVBAYTAk1YMRkwFwYDVQQIDBBDSVVEQUQgREUgTUVYSUNPMREwDwYDVQQHDAhDT1lPQUNBTjERMA8GA1UELRMIMi41LjQuNDUxJTAjBgkqhkiG9w0BCQITFnJlc3BvbnNhYmxlOiBBQ0RNQS1TQVQwHhcNMjMwNTE4MTUxOTE1WhcNMjcwNTE4MTUxOTE1WjCBlTEXMBUGA1UEAxQOTFVJUyBJQU4g0VVaQ08xFzAVBgNVBCkUDkxVSVMgSUFOINFVWkNPMRcwFQYDVQQKFA5MVUlTIElBTiDRVVpDTzEWMBQGA1UELRQNSUHRTDc1MDIxMDk2MzEbMBkGA1UEBRMSSUFOTDc1MDIxMEhTUk5aUzA5MRMwEQYDVQQLEwpTdWN1cnNhbCAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAseD/ItVEbMTocrzpvWyW/KDrIMNQ1H5gDXEQYkmJAJtqgoR6XSS1LXzyadOkGQyL7HKMdfU/eBHiUPIq6HaL0KI57LSMI+7+KXoWJCOOwZEyukvj8xcSlaHPn5wdQsbytS8/qeCXk8D2di7DKMPfl6UBMHzorf6/0b7Rt0eQ523G2nv1cVgcTipvFPBN+K+OwBZg+w0grU2c6HUvHtoBBNNjitRpJ8luDsqlpGxpryzWSGokCPtzHuFjN/Isw3HF/QiJW7FkdNCZ7yBkLlxZTuTjLobL6o9htmiU3tSAcxRrh2TppFti8jQQRJJagODPJJ9Kar8ap4aa45SVENLQrwIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkqhkiG9w0BAQsFAAOCAgEAYrsR/bSYsrImNf2441I+PrDff/eLKNjpfmkKHJbr/2q9F8P75osBVwqLxcrmm3i8/h67TfoABGVTNKu7s3KNX6Nc8rBdW+jyMA+Dnr7JmWGOqAbT3bfuQZIxmm4kZbpEAKTcMRtcSlLpxpqhNxcjlLxaYJBaa0nthZbLocouXAed41vkdLdAc7QUW5b12vrmgEVabGPR3NFr6KsQ6rOK0aGQHey4EQAfrNYuzMoHOPWvJz5Y5cY0ZpZN0smZey08LbkcyW8oMGdp44EQDflRKFdxmG3iNKkeGJBC6tdtO0kq9gRu8sajlWF+xrD4qsddw2Tt2WynuDB6Kaff8oHz4g4PsIDtDMvitz4K3ItbBBnxSUz25aOqz34K8Lt6LXfHsDJFwxbH5hknMvCFUoqRZgEUCpq0T/FL/wVN3Ejs9nXYWIKlMhd3JE2xUtPSM4W6ukLTcrWwO7rj5yMuLAdoQDykwFnb+VESr3ULGAF20kp3DsDT4/zjQnJwaT+IcD35EMAugJO/F5+veFRaJNAoiwmFTPXMRvvOjsqlfd/jGoMdhHFwy57053wfopYDt42TWmJCrYkC54rs2TNMutEmyUW/7O0Sv4LBpnImThuA0e4H5MIeO0UgQbLrVaR47lZrgLA3sIlaUJvqUjUCc0luAohpXYQY+LJnPlB3Qhhowqc=" SubTotal="350.75" Moneda="MXN" Total="406.87" TipoDeComprobante="E" Exportacion="01" MetodoPago="PUE" LugarExpedicion="82525">
+  <cfdi:CfdiRelacionados TipoRelacion="01">
+    <cfdi:CfdiRelacionado UUID="5FB2822E-396D-4725-8521-CDC4BDD20CCF" />
+  </cfdi:CfdiRelacionados>
+  <cfdi:Emisor Rfc="IAÑL750210963" Nombre="LUIS IAN ÑUZCO" RegimenFiscal="608" />
+  <cfdi:Receptor Rfc="FUNK671228PH6" Nombre="KARLA FUENTE NOLASCO" DomicilioFiscalReceptor="01160" RegimenFiscalReceptor="621" UsoCFDI="G02" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84111506" Cantidad="1" ClaveUnidad="E48" Unidad="Unidad de servicio" Descripcion="Devolución parcial del servicio" ValorUnitario="350.75" Importe="350.75" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="350.75" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="56.12" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="56.12">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="350.75" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="56.12" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+</cfdi:Comprobante>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Fecha="2026-11-21T00:05:00" Sello="bbT6XOfq2dSunMyDQAkfx6Q6jamoTgWKwsCrSqG0hs1qDvqmVafmT92XyLAPpTyNoBzT1xj373n6nz69NEMp5HvZnolWXbub13QNkKA83A5hzBlBpPsBUMSEanJ2gRC6fhvigpkvASRpTJpBBMpixqHMCtfQqvhi5p3m0U2pRSEXhWRniySp/teOX4YFxJCOYSUGfiUtw6Hhxmk6RK6DDL8ZtpO+fa2bu48NX0DOPKCLvgoVXeKGLTg73Na5Mtg0S9bgcvIPIL/7HnjtwO7S5TmV+IbM3QFzy9TlP27Fro2D1g+zlrV2eD6U3pr+t1Oi8bVYLAMNG2dPhbKbZxWb/g==" FormaPago="01" NoCertificado="30001000000500003359" Certificado="MIIFiTCCA3GgAwIBAgIUMzAwMDEwMDAwMDA1MDAwMDMzNTkwDQYJKoZIhvcNAQELBQAwggErMQ8wDQYDVQQDDAZBQyBVQVQxLjAsBgNVBAoMJVNFUlZJQ0lPIERFIEFETUlOSVNUUkFDSU9OIFRSSUJVVEFSSUExGjAYBgNVBAsMEVNBVC1JRVMgQXV0aG9yaXR5MSgwJgYJKoZIhvcNAQkBFhlvc2Nhci5tYXJ0aW5lekBzYXQuZ29iLm14MR0wGwYDVQQJDBQzcmEgY2VycmFkYSBkZSBjYWxpejEOMAwGA1UEEQwFMDYzNzAxCzAJBgNVBAYTAk1YMRkwFwYDVQQIDBBDSVVEQUQgREUgTUVYSUNPMREwDwYDVQQHDAhDT1lPQUNBTjERMA8GA1UELRMIMi41LjQuNDUxJTAjBgkqhkiG9w0BCQITFnJlc3BvbnNhYmxlOiBBQ0RNQS1TQVQwHhcNMjMwNTE1MTY1NDA0WhcNMjcwNTE1MTY1NDA0WjCBsDEgMB4GA1UEAxMXQ0VDSUxJQSBNSVJBTkRBIFNBTkNIRVoxIDAeBgNVBCkTF0NFQ0lMSUEgTUlSQU5EQSBTQU5DSEVaMSAwHgYDVQQKExdDRUNJTElBIE1JUkFOREEgU0FOQ0hFWjEWMBQGA1UELRMNTUlTQzQ5MTIxNEI4NjEbMBkGA1UEBRMSTUlTQzQ5MTIxNE1DQ1JOQzAxMRMwEQYDVQQLEwpTdWN1cnNhbCAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlJRZRgEmqXvNLPXrZ/5IUiN8SJpumnYA9Gh/LvSxPZUDeYl9B7mL7/SbjE139WUZYBKlcR/od/1jgAiHqIxInAm3ggBD4MwO+nYHFPXZytIGh2tFQ2l47DyZKkhdzkcLuwS3Pu25YrgdRy6o7DcIxEqXUbvpZzbFe8+U3XgC0AnsWBBRwbRitlpfkRSPFA+qqofYdXFhb7pnr7aWkykohsRUfsaEwToQcYNtNafJncrinElgsZsH8IaQ4MeqEXpPSqKgp+5uYULfVkOOHIPKFCsE60Jv2+sGOSi9adcQ+virN0Uw440bsohbHeb5VNmCXKAlB5snVo+dYuGzcaZY/QIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkqhkiG9w0BAQsFAAOCAgEAo5aMM/BQizSjtctSg14uLVZ8frWWxFCikYpio/PFmAZWpavXnT+NUipLFXYcUbFCHHt/RGC15QnaiJRurPRWOAQkLqqLy+guAeaA9EbKtViWAKnnUlCQnLJ/TbZoxzyLKHsW2jp/kTkAA5W9EuHJbTLyIobCa+yah0Xbb55o22mdSzl43qVgxYz13IBms1p5iFDzSvO4ccNMglvBZYICKRVM/XKhsB7NjvHowilKITWoZVirbHiztX+dxsRgE7g/ccDkFLP2mh6jI/3EuptWD5yR8SUmGcv8f0UC/ebWQ0DHNOonNKjL+spRVM8PqbABd3nboGm1oq5/8Je73ElpYjAb26XLUKwKGimY1gKyEeW0vcP62/hvrvHsu7/u8492wDbYurcpraVKl8E3hygTfSbYovAmUy9Kvlz6kiuywMJBpj+IwqFPNc89MLP5n4XhWgH4esb6pidulZTBpH3aE4KtSn+MTUzBYVctj72OgFjqkSe56Hb1E0Q2+pDu5XKnGP4yiaOJWiyoNcSp/9caQcKGkZqWMB69N519I3g4iDv0gf+WYy79ygj6z8Yg/1oJ3QklGmTSgaAYdXAAMeHjna9OTvwr2OE2dtaYVIT5bkEzTmzKVq6yDJuQZqYgw9obdNyH7PrBzvnnNC24/8IISaTgaHfJnX3LjQDJbYq72bg=" SubTotal="4580.00" Moneda="MXN" Total="5312.80" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="01010">
+  <cfdi:InformacionGlobal Periodicidad="01" Meses="11" Año="2026" />
+  <cfdi:Emisor Rfc="MISC491214B86" Nombre="CECILIA MIRANDA SANCHEZ" RegimenFiscal="612" />
+  <cfdi:Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL" DomicilioFiscalReceptor="01010" RegimenFiscalReceptor="616" UsoCFDI="S01" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="01010101" Cantidad="1" ClaveUnidad="ACT" Descripcion="Venta" ValorUnitario="4580.00" Importe="4580.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="4580.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="732.80" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="732.80">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="4580.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="732.80" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+</cfdi:Comprobante>

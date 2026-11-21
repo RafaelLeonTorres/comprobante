@@ -14,8 +14,9 @@ public sealed record SolicitudCfdi
     public string? Folio { get; init; }
 
     /// <summary>
-    /// Fecha y hora de expedición, en la hora local del lugar de expedición. Si se omite se usa la hora actual de ese lugar
-    /// (la zona la da el catálogo de códigos postales).
+    /// Fecha y hora de expedición, en la hora local del lugar de expedición y sin zona horaria (<c>2026-11-21T09:30:00</c>):
+    /// se escribe tal cual, sin fracciones de segundo. Si se omite se usa la hora actual de ese lugar (la zona la da el
+    /// catálogo de códigos postales).
     /// </summary>
     public DateTime? Fecha { get; init; }
 

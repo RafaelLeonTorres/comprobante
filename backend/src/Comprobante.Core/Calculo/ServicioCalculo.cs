@@ -14,7 +14,16 @@ public sealed class ServicioCalculo(ICatalogos catalogos)
             return Resultado<ResultadoCalculo>.Fallo([new("", "Falta el comprobante: el cuerpo de la solicitud está vacío.")]);
         }
 
-        var normalizada = solicitud.Normalizada();
+        return await CalcularNormalizadaAsync(solicitud.Normalizada(), cancelacion);
+    }
+
+    /// <summary>
+    /// Lo mismo con la solicitud ya normalizada (<see cref="SolicitudCfdi.Normalizada"/>), para quien después arma el XML con
+    /// esos mismos datos, como el generador.
+    /// </summary>
+    public async Task<Resultado<ResultadoCalculo>> CalcularNormalizadaAsync(
+        SolicitudCfdi normalizada, CancellationToken cancelacion = default)
+    {
         var pequenos = await catalogos.PequenosAsync(cancelacion);
 
         var errores = ValidadorSolicitud.Validar(normalizada, pequenos);

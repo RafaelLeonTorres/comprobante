@@ -1,0 +1,26 @@
+{
+  "serie": "A",
+  "folio": "123",
+  "fecha": "2026-11-21T09:30:00",
+  "formaPago": "01",
+  "metodoPago": "PUE",
+  "emisor": { "rfc": "EKU9003173C9" },
+  "receptor": {
+    "rfc": "XIA190128J61",
+    "nombre": "XENON INDUSTRIAL ARTICLES",
+    "domicilioFiscalReceptor": "76343",
+    "regimenFiscalReceptor": "622",
+    "usoCfdi": "G03"
+  },
+  "conceptos": [
+    {
+      "claveProdServ": "84111506",
+      "claveUnidad": "E48",
+      "unidad": "Unidad de servicio",
+      "descripcion": "Servicio de facturación electrónica",
+      "cantidad": 1,
+      "valorUnitario": 1000.00,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.16 } ]
+    }
+  ]
+}

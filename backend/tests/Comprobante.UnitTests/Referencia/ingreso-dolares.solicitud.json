@@ -1,0 +1,39 @@
+{
+  "serie": "USD",
+  "folio": "7",
+  "fecha": "2026-11-20T18:05:09",
+  "formaPago": "03",
+  "metodoPago": "PUE",
+  "moneda": "USD",
+  "tipoCambio": 17.4521,
+  "emisor": { "rfc": "H&E951128469" },
+  "receptor": {
+    "rfc": "L&O950913MSA",
+    "nombre": "LUCES & OBRAS",
+    "domicilioFiscalReceptor": "60922",
+    "regimenFiscalReceptor": "626",
+    "usoCfdi": "G03"
+  },
+  "conceptos": [
+    {
+      "claveProdServ": "84111506",
+      "claveUnidad": "E48",
+      "unidad": "Unidad de servicio",
+      "descripcion": "Servicio por hora & soporte",
+      "cantidad": 3.141649,
+      "valorUnitario": 1230.00,
+      "descuento": 864.10,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.16 } ]
+    },
+    {
+      "claveProdServ": "43231500",
+      "noIdentificacion": "SKU-9981",
+      "claveUnidad": "H87",
+      "unidad": "Pieza",
+      "descripcion": "Licencia de uso",
+      "cantidad": 2,
+      "valorUnitario": 33.333333,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.16 } ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "fecha": "2026-11-21T00:05:00",
+  "formaPago": "01",
+  "metodoPago": "PUE",
+  "emisor": { "rfc": "MISC491214B86" },
+  "receptor": {
+    "rfc": "XAXX010101000",
+    "nombre": "PUBLICO EN GENERAL",
+    "domicilioFiscalReceptor": "01010",
+    "regimenFiscalReceptor": "616",
+    "usoCfdi": "S01"
+  },
+  "informacionGlobal": { "periodicidad": "01", "meses": "11", "anio": 2026 },
+  "conceptos": [
+    {
+      "claveProdServ": "01010101",
+      "claveUnidad": "ACT",
+      "descripcion": "Venta",
+      "cantidad": 1,
+      "valorUnitario": 4580.00,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.16 } ]
+    }
+  ]
+}

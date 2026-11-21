@@ -52,7 +52,7 @@ Notas:
 - **Catálogos en PostgreSQL (decisión del 21 de noviembre de 2026).** El plan inicial los cargaba en memoria desde los CSV. Se cambió a una base de datos con EF Core para mostrar modelado, migraciones y consultas con índices. El costo es un contenedor más y una carga inicial de unos 14 segundos (151 346 filas) la primera vez que arranca.
 - **CFDI 4.0 sigue siendo la única versión válida** (lo es desde el 1 de abril de 2023). En 2026 lo que cambió fueron la guía de llenado, los catálogos y algunas validaciones complementarias, no la estructura del XML.
 - **Los catálogos cambian varias veces al año.** Por ejemplo, el 3 de septiembre de 2025 (productos y servicios, pedimentos y patentes aduanales) y el 2 de marzo de 2026 (pedimentos). Por eso la versión de los catálogos se ve en la app y actualizarlos es correr el importador.
-- **XSLT 2.0 contra 1.0:** los XSLT del SAT se declaran como XSLT 2.0, pero usan funciones compatibles con 1.0, y otras librerías los procesan con motores 1.0. `XslCompiledTransform` implementa XSLT 1.0, así que en la fase 2 las pruebas comparan las cadenas originales contra ejemplos con resultado conocido. Si un XSLT nuevo usara funciones exclusivas de 2.0, el plan B es armar la cadena original en C#.
+- **XSLT 2.0 contra 1.0:** los XSLT del SAT se declaran como XSLT 2.0, pero usan funciones compatibles con 1.0, y otras librerías los procesan con motores 1.0. `XslCompiledTransform` implementa XSLT 1.0, así que las pruebas comparan las cadenas originales contra las que calcula aparte libxslt (lxml) con los mismos XSLT. Comprobado en la fase 2: coinciden en los cinco comprobantes de referencia (acentos, `&`, `Ñ`, retenciones, exentos, relacionados e información global). Si un XSLT nuevo usara funciones exclusivas de 2.0, el plan B es armar la cadena original en C#.
 
 ---
 
@@ -108,8 +108,7 @@ Comprobante/                            F:\Respaldo\Respaldo\Cursos\Comprobante 
 │   ├── xslt/                           cadenaoriginal_4_0.xslt y los XSLT que incluye
 │   ├── csd-prueba/                     .cer, .key y emisores.json de los CSD de prueba del SAT (son públicos)
 │   ├── catalogos/                      un CSV por catálogo y version.json con la fecha de publicación
-│   ├── matriz/                         matriz-errores.csv: las 129 reglas con su código y su mensaje
-│   └── ejemplos/                       XML de referencia con su cadena original esperada
+│   └── matriz/                         matriz-errores.csv: las 129 reglas con su código y su mensaje
 ├── backend/
 │   ├── Dockerfile
 │   ├── Comprobante.slnx
@@ -119,7 +118,7 @@ Comprobante/                            F:\Respaldo\Respaldo\Cursos\Comprobante 
 │   │   ├── Comprobante.Herramientas/   importador del Excel del SAT (consola)
 │   │   └── Comprobante.Api/            endpoints, límites y OpenAPI
 │   └── tests/
-│       ├── Comprobante.UnitTests/
+│       ├── Comprobante.UnitTests/      incluye Referencia/: XML sellados y cadenas originales hechos con Python, lxml y OpenSSL
 │       └── Comprobante.IntegrationTests/   la API contra un PostgreSQL desechable (Testcontainers)
 └── frontend/                           Angular 22
     ├── Dockerfile
@@ -162,7 +161,7 @@ Detalles que vale la pena mostrar en el portafolio:
 5. **Sello:** firma RSA (PKCS#1 v1.5) con SHA-256 sobre los bytes UTF-8 de la cadena original, en Base64.
 6. **Validación final:** el XML sellado pasa por el validador completo antes de entregarse.
 
-La respuesta trae el XML, la cadena original, el sello, el cálculo y el reporte de validación. El archivo descargado se llama `{Serie}{Folio}-prueba.xml`.
+La respuesta trae el XML, la cadena original, el sello, el cálculo y el reporte de validación. El archivo descargado se llama `{RFC}-{Serie}-{Folio}-prueba.xml` (con la fecha en lugar de la serie y el folio si no los hay; los caracteres que no son letras, números, guion o guion bajo, como el `&` de algunos RFC de prueba, pasan a guion bajo).
 
 ---
 
@@ -252,8 +251,8 @@ Prácticas, las mismas que en Mediateca:
 - **Unitarias (xUnit):**
   - cálculo y redondeo con muchos casos `[Theory]`: varios conceptos, descuentos, exentos, tasa 0, IEPS por cuota, retenciones y una moneda con otro número de decimales;
   - el XML generado contra archivos de referencia;
-  - la cadena original contra ejemplos con resultado conocido;
-  - firma y verificación con un CSD de prueba;
+  - la cadena original contra las que calcula libxslt;
+  - firma y verificación con los diez CSD de prueba, y el XML sellado idéntico byte por byte al que arma una implementación independiente (Python, lxml y OpenSSL; el sello PKCS#1 v1.5 es determinista);
   - cada regla con casos que pasan y que fallan;
   - el importador de catálogos con un Excel pequeño de ejemplo.
 - **Integración (WebApplicationFactory):**
@@ -294,7 +293,7 @@ Prácticas, las mismas que en Mediateca:
 
 Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase 0 se trabaja con ramas y pull requests.
 
-**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía) y la fase 1 completa (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`, con 77 pruebas unitarias y 25 de integración). Lo siguiente: la fase 2 (XML, cadena original y sello).
+**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`) y la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica; 193 pruebas unitarias y 33 de integración). Lo siguiente: la fase 3 (el motor de reglas del validador y `POST /api/validaciones`).
 
 ### Fase 0. Base del proyecto
 - [x] Confirmar las decisiones de la sección 14.
@@ -319,11 +318,12 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 **Entregable:** la API calcula un comprobante con varios conceptos e impuestos, y los totales cuadran.
 
 ### Fase 2. XML, cadena original y sello
-- [ ] Escritor del XML con el orden y el formato del esquema.
-- [ ] Validación XSD con los esquemas locales.
-- [ ] Cadena original con el XSLT del SAT y el resolver local, comparada contra los ejemplos de `sat/ejemplos/`.
-- [ ] Lectura del CSD (`.cer` y `.key`), `NoCertificado`, firma y verificación.
-- [ ] `POST /api/comprobantes` y `GET /api/emisores-prueba`.
+- [x] Escritor del XML con el orden y el formato del esquema (`EscritorCfdi`, con la declaración de espacios de nombres en el orden de los ejemplos del SAT).
+- [x] Validación XSD con los esquemas locales (`ValidadorXsd`; el esquema de 6 MB se compila una vez y los mensajes salen en español, con el nodo, el atributo y la línea).
+- [x] Cadena original con el XSLT del SAT y el resolver local, comparada contra la que calcula libxslt (`sat/` ya no lleva `ejemplos/`: las pruebas usan `backend/tests/Comprobante.UnitTests/Referencia/`).
+- [x] Lectura del CSD (`.cer` y `.key`), `NoCertificado`, firma y verificación, con los diez certificados de prueba.
+- [x] `POST /api/comprobantes` y `GET /api/emisores-prueba`.
+- [x] Pruebas: 116 unitarias nuevas (CSD, cadena original, XSD, sello, zona horaria, nombre de archivo y cinco comprobantes idénticos byte por byte a los de la implementación independiente) y 8 de integración.
 
 **Entregable:** un CFDI de ingreso sellado con un CSD de prueba pasa el XSD y su sello verifica.
 
@@ -401,7 +401,7 @@ Confirmadas el 21 de noviembre de 2026:
 | Diferencias de centavos por redondeo | `decimal`, un solo módulo de cálculo, muchos casos de prueba, y el validador revisa lo que genera el generador |
 | XML malicioso: XXE, bombas de entidades o archivos enormes | Lectura sin DTD ni resolver, y límite de tamaño en nginx y en la API |
 | Que alguien confunda el XML con una factura válida | Aviso en la app, en el README y en el nombre del archivo; la app no timbra |
-| Los CSD de prueba vencen o el SAT los reemplaza | Versionados con su vigencia, y el README explica cómo cambiarlos |
+| Los CSD de prueba vencen (el 18 de mayo de 2027) o el SAT los reemplaza | Versionados con su vigencia, que `GET /api/emisores-prueba` muestra; el README explica cómo cambiarlos y, para regenerar `Referencia/`, un script |
 | Carga y consulta de los catálogos grandes | PostgreSQL con índices `pg_trgm`; siembra idempotente con huella y candado; healthcheck con `start_period` para la primera carga (unos 14 s, medida en la fase 1) |
 | Las pruebas de integración y la CI necesitan Docker | Testcontainers levanta un PostgreSQL desechable; GitHub Actions ya trae Docker |
 | Reglas que dependen del padrón del SAT (nombre, régimen y código postal reales del receptor) | Quedan fuera y la app lo explica: valida forma y consistencia, no existencia |

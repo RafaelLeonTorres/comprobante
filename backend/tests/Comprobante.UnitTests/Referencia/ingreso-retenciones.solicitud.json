@@ -1,0 +1,51 @@
+{
+  "serie": "H",
+  "folio": "2026-0042",
+  "fecha": "2026-11-19T12:00:00",
+  "formaPago": "03",
+  "metodoPago": "PUE",
+  "condicionesDePago": "Contado",
+  "emisor": { "rfc": "WATM640917J45" },
+  "receptor": {
+    "rfc": "EKU9003173C9",
+    "nombre": "ESCUELA KEMPER URGATE",
+    "domicilioFiscalReceptor": "42501",
+    "regimenFiscalReceptor": "601",
+    "usoCfdi": "G03"
+  },
+  "conceptos": [
+    {
+      "claveProdServ": "80101500",
+      "claveUnidad": "HUR",
+      "unidad": "Hora",
+      "descripcion": "Asesoría en administración corporativa",
+      "cantidad": 10,
+      "valorUnitario": 850.00,
+      "descuento": 100.00,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.16 } ],
+      "retenciones": [
+        { "impuesto": "001", "tipoFactor": "Tasa", "tasaOCuota": 0.10 },
+        { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.106667 }
+      ]
+    },
+    {
+      "claveProdServ": "81111500",
+      "noIdentificacion": "SW-01",
+      "claveUnidad": "E48",
+      "unidad": "Unidad de servicio",
+      "descripcion": "Configuración de software",
+      "cantidad": 1,
+      "valorUnitario": 2500.50,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Tasa", "tasaOCuota": 0.0 } ]
+    },
+    {
+      "claveProdServ": "43231500",
+      "claveUnidad": "H87",
+      "unidad": "Pieza",
+      "descripcion": "Manual impreso",
+      "cantidad": 2,
+      "valorUnitario": 99.99,
+      "traslados": [ { "impuesto": "002", "tipoFactor": "Exento" } ]
+    }
+  ]
+}
