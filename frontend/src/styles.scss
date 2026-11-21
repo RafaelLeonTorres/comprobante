@@ -16,6 +16,9 @@ html {
       density: 0,
     )
   );
+
+  // Anillo de foco visible al navegar con teclado. Sin esto Material solo cambia el tono del botón enfocado (su borde sale transparente).
+  @include mat.strong-focus-indicators();
 }
 
 body {
@@ -31,4 +34,39 @@ code,
 pre,
 .mono {
   font-family: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+}
+
+// Un aviso o un resultado recibe el foco por código y se lleva arriba de la ventana (core/foco.ts): que quede un respiro.
+[tabindex='-1'],
+section[aria-labelledby] {
+  scroll-margin-top: 16px;
+}
+
+// Formularios: las secciones de una pantalla y la rejilla de campos que las llena (la usan Generar y sus componentes).
+.seccion {
+  margin: 0 0 24px;
+  padding: 16px 16px 8px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background-color: var(--mat-sys-surface-container-lowest);
+
+  > h2 {
+    margin: 0 0 12px;
+    font: var(--mat-sys-title-large);
+  }
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 4px 16px;
+  align-items: start;
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  > .completo {
+    grid-column: 1 / -1;
+  }
 }
