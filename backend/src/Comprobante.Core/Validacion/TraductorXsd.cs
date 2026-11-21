@@ -58,6 +58,9 @@ internal static partial class TraductorXsd
         return (texto, null);
     }
 
+    /// <summary>Si el mensaje dice que un elemento no está declarado en ningún esquema.</summary>
+    public static bool EsElementoNoDeclarado(string mensaje) => ElementoNoDeclarado().IsMatch(mensaje.Trim());
+
     private static string Restriccion(string restriccion) => restriccion switch
     {
         _ when restriccion.Contains("Pattern", StringComparison.Ordinal) => "no tiene el formato que pide el esquema",

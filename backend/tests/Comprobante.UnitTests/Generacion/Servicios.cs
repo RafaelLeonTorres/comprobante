@@ -19,7 +19,8 @@ internal static class Servicios
     public static readonly DateTimeOffset Ahora = new(2026, 11, 21, 15, 30, 0, TimeSpan.Zero);
 
     public static ServicioGeneracion Generacion(ICatalogos catalogos, DateTimeOffset? ahora = null) =>
-        new(catalogos, new ServicioCalculo(catalogos), new EmisoresDePrueba(), Validador(catalogos), new RelojFijo(ahora ?? Ahora));
+        new(catalogos, new ServicioCalculo(catalogos), new EmisoresDePrueba(), Validador(catalogos, ahora), new RelojFijo(ahora ?? Ahora));
 
-    public static ValidadorCfdi Validador(ICatalogos catalogos) => new(catalogos);
+    public static ValidadorCfdi Validador(ICatalogos catalogos, DateTimeOffset? ahora = null) =>
+        new(catalogos, new RelojFijo(ahora ?? Ahora));
 }

@@ -5,9 +5,16 @@ using Comprobante.Core.Xml;
 
 namespace Comprobante.Core.Validacion;
 
-/// <summary>Valida un XML contra el esquema del CFDI 4.0 y devuelve cada incumplimiento como un hallazgo.</summary>
+/// <summary>
+/// Valida un XML contra el esquema del CFDI 4.0 y devuelve cada incumplimiento como un hallazgo. El esquema del SAT deja abiertos
+/// los nodos Complemento, ComplementoConcepto y Addenda (admiten cualquier elemento), pero exige que cada elemento tenga su propio
+/// esquema; la app solo trae el del Timbre Fiscal Digital. Un complemento de otro esquema no es un error del comprobante: se
+/// deja sin revisar y <c>ReglasComplementos</c> lo avisa con CMP004.
+/// </summary>
 internal static class ValidadorXsd
 {
+    private static readonly XNamespace Cfdi = EscritorCfdi.EspacioCfdi;
+
     /// <summary>Un XML muy roto puede dar miles de errores iguales; se muestran los primeros.</summary>
     internal const int MaximoDeHallazgos = 200;
 
@@ -19,6 +26,11 @@ internal static class ValidadorXsd
             EsquemasCfdi.Conjunto,
             (remitente, args) =>
             {
+                if (EsContenidoSinEsquema(remitente, args))
+                {
+                    return;
+                }
+
                 if (hallazgos.Count >= MaximoDeHallazgos)
                 {
                     omitidos++;
@@ -41,6 +53,14 @@ internal static class ValidadorXsd
 
         return hallazgos;
     }
+
+    /// <summary>El esquema se queja de un elemento sin declarar que cuelga de un nodo abierto (Complemento, ComplementoConcepto o Addenda).</summary>
+    private static bool EsContenidoSinEsquema(object? remitente, ValidationEventArgs args) =>
+        args.Severity == XmlSeverityType.Error
+        && TraductorXsd.EsElementoNoDeclarado(args.Message)
+        && remitente is XElement { Parent: { } padre }
+        && padre.Name.Namespace == Cfdi
+        && padre.Name.LocalName is "Complemento" or "ComplementoConcepto" or "Addenda";
 
     private static Hallazgo Convertir(object? remitente, ValidationEventArgs args)
     {

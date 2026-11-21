@@ -3,6 +3,7 @@ using Comprobante.Api;
 using Comprobante.Api.Catalogos;
 using Comprobante.Api.Comprobantes;
 using Comprobante.Api.Errores;
+using Comprobante.Api.Validaciones;
 using Comprobante.Catalogos;
 using Comprobante.Core.Calculo;
 using Comprobante.Core.Generacion;
@@ -49,6 +50,7 @@ app.MapGet("/api/health", () => Results.Ok(new { estado = "ok" }))
     .WithSummary("Responde ok cuando la API ya arrancó y cargó los catálogos.");
 app.MapCatalogos();
 app.MapComprobantes();
+app.MapValidaciones();
 
 app.Run();
 

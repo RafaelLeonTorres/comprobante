@@ -1,4 +1,5 @@
 using System.Text;
+using System.Xml.Linq;
 using Comprobante.Core.Validacion;
 using Comprobante.UnitTests.Generacion;
 
@@ -31,9 +32,10 @@ public class ValidadorCfdiTests(CatalogosFixture catalogos)
     }
 
     [Fact]
-    public async Task Cambiar_un_importe_invalida_el_sello_y_el_esquema_sigue_pasando()
+    public async Task Cambiar_un_dato_que_ninguna_regla_revisa_invalida_solo_el_sello()
     {
-        var reporte = await Validar(Basico().Replace("Total=\"1160.00\"", "Total=\"1161.00\"", StringComparison.Ordinal));
+        // La descripción del concepto no la revisa ninguna regla, pero sí entra en la cadena original.
+        var reporte = await Validar(Basico().Replace("Descripcion=\"", "Descripcion=\"(cambiada) ", StringComparison.Ordinal));
 
         Assert.False(reporte.EsValido);
         Assert.False(reporte.SelloValido);
@@ -42,6 +44,20 @@ public class ValidadorCfdiTests(CatalogosFixture catalogos)
         Assert.Equal(Severidad.Error, hallazgo.Severidad);
         Assert.Equal("Sello", hallazgo.Atributo);
         Assert.Equal("cfdi:Comprobante", hallazgo.Nodo);
+    }
+
+    [Fact]
+    public async Task Cambiar_el_total_se_detecta_por_la_regla_del_total_y_por_el_sello()
+    {
+        var reporte = await Validar(Basico().Replace("Total=\"1160.00\"", "Total=\"1161.00\"", StringComparison.Ordinal));
+
+        Assert.False(reporte.EsValido);
+        Assert.False(reporte.SelloValido);
+        Assert.Equal(["CFDI40119", "CFDI40102"], reporte.Hallazgos.Select(h => h.Codigo));
+        var total = reporte.Hallazgos[0];
+        Assert.Equal("Total", total.Atributo);
+        Assert.Equal("1161.00", total.Encontrado);
+        Assert.Equal("1160.00", total.Esperado);
     }
 
     [Fact]
@@ -102,11 +118,13 @@ public class ValidadorCfdiTests(CatalogosFixture catalogos)
     }
 
     [Fact]
-    public async Task Un_valor_fuera_de_un_catalogo_del_esquema_dice_que_no_es_uno_de_los_permitidos()
+    public void El_esquema_dice_que_un_valor_fuera_de_un_catalogo_no_es_uno_de_los_permitidos()
     {
-        var reporte = await Validar(Basico().Replace("Moneda=\"MXN\"", "Moneda=\"ZZZ\"", StringComparison.Ordinal));
+        var documento = XDocument.Parse(Basico().Replace("Moneda=\"MXN\"", "Moneda=\"ZZZ\"", StringComparison.Ordinal));
 
-        var hallazgo = reporte.Hallazgos.Single(h => h.Codigo == "CMP003");
+        var hallazgo = ValidadorXsd.Validar(documento).Single();
+
+        Assert.Equal("CMP003", hallazgo.Codigo);
         Assert.Equal("Moneda", hallazgo.Atributo);
         Assert.Equal("cfdi:Comprobante", hallazgo.Nodo);
         Assert.Contains("\"ZZZ\"", hallazgo.Mensaje, StringComparison.Ordinal);
@@ -114,13 +132,31 @@ public class ValidadorCfdiTests(CatalogosFixture catalogos)
     }
 
     [Fact]
-    public async Task Un_valor_con_otro_formato_dice_que_no_tiene_el_formato_del_esquema()
+    public void El_esquema_dice_que_un_valor_con_otro_formato_no_tiene_el_formato_que_pide()
     {
-        var reporte = await Validar(Basico().Replace("Fecha=\"2026-11-21T09:30:00\"", "Fecha=\"2026-11-21 09:30:00\"", StringComparison.Ordinal));
+        var documento = XDocument.Parse(
+            Basico().Replace("Fecha=\"2026-11-21T09:30:00\"", "Fecha=\"2026-11-21 09:30:00\"", StringComparison.Ordinal));
 
-        var hallazgo = reporte.Hallazgos.Single(h => h.Codigo == "CMP003");
+        var hallazgo = ValidadorXsd.Validar(documento).Single();
+
+        Assert.Equal("CMP003", hallazgo.Codigo);
         Assert.Equal("Fecha", hallazgo.Atributo);
         Assert.Contains("no tiene el formato que pide el esquema", hallazgo.Mensaje, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Cuando_una_regla_del_SAT_senala_el_mismo_atributo_que_el_esquema_queda_el_hallazgo_del_SAT()
+    {
+        var moneda = await Validar(Basico().Replace("Moneda=\"MXN\"", "Moneda=\"ZZZ\"", StringComparison.Ordinal));
+        var fecha = await Validar(
+            Basico().Replace("Fecha=\"2026-11-21T09:30:00\"", "Fecha=\"2026-11-21 09:30:00\"", StringComparison.Ordinal));
+
+        var porMoneda = Assert.Single(moneda.Hallazgos, h => h.Atributo == "Moneda");
+        Assert.Equal("CFDI40113", porMoneda.Codigo);
+        Assert.Contains("ZZZ", porMoneda.Mensaje, StringComparison.Ordinal);
+        var porFecha = Assert.Single(fecha.Hallazgos, h => h.Atributo == "Fecha");
+        Assert.Equal("CFDI40101", porFecha.Codigo);
+        Assert.DoesNotContain(moneda.Hallazgos.Concat(fecha.Hallazgos), h => h.Codigo == "CMP003");
     }
 
     [Fact]

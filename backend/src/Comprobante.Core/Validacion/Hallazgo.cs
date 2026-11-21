@@ -52,6 +52,9 @@ public static class Codigos
     /// <summary>No se pudo calcular la cadena original con el XSLT del SAT, así que tampoco se puede revisar el sello.</summary>
     public const string CadenaOriginalNoCalculable = "CMP005";
 
+    /// <summary>Hubo más hallazgos de las reglas del SAT de los que se muestran: se guardan los primeros y se cuenta el resto.</summary>
+    public const string ReglasOmitidas = "CMP006";
+
     /// <summary>La Fecha del comprobante está en el futuro según la zona horaria del lugar de expedición.</summary>
     public const string FechaEnElFuturo = "CMP101";
 }

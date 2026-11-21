@@ -10,10 +10,11 @@
     <ProjectReference Include="..\Comprobante.Core\Comprobante.Core.csproj" />
   </ItemGroup>
 
-  <!-- Los CSV de sat/catalogos viajan dentro del ensamblado: así el contenedor de la API no necesita montar archivos. -->
+  <!-- Los CSV de sat/catalogos y la matriz de errores viajan dentro del ensamblado: así el contenedor de la API no necesita montar archivos. -->
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\sat\catalogos\*.csv" LogicalName="catalogos/%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\..\..\sat\catalogos\version.json" LogicalName="catalogos/version.json" />
+    <EmbeddedResource Include="..\..\..\sat\matriz\matriz-errores.csv" LogicalName="matriz/matriz-errores.csv" />
   </ItemGroup>
 
   <ItemGroup>

@@ -183,7 +183,17 @@ En este orden; si una capa falla de forma que impide seguir (XML mal formado, ot
 
 4. **Advertencias** que no rechazaría un PAC pero conviene revisar, por ejemplo una `Fecha` en el futuro según la zona horaria del código postal de `LugarExpedicion` (el catálogo `c_CodigoPostal` la trae).
 
-Los códigos y textos de cada regla se copian de la matriz de errores oficial del CFDI 4.0. Lo que no tiene código en la matriz (errores del XSD, advertencias) usa códigos propios con prefijo `CMP`.
+Los códigos y textos de cada regla se copian de la matriz de errores oficial del CFDI 4.0. Lo que no tiene código en la matriz (errores del XSD, advertencias) usa códigos propios con prefijo `CMP`: `CMP001` (XML ilegible), `CMP002` (no es un CFDI 4.0), `CMP003` (error del esquema), `CMP004` (complemento sin revisar, advertencia), `CMP005` (no se pudo calcular la cadena original, así que tampoco el sello), `CMP006` (hubo más de 300 hallazgos de reglas: se guardan los primeros y se cuenta el resto) y `CMP101` (fecha en el futuro, advertencia).
+
+**Cobertura de la matriz.** La matriz trae 129 reglas. El validador revisa 103 completas y 5 en parte; las otras 21 no, porque necesitan datos que la app no tiene sin conexión: la lista de RFC inscritos (LRFC), el tipo de cambio oficial del DOF, la lista de contribuyentes obligados, los catálogos de aduanas y patentes, el límite del `Total` de la Resolución Miscelánea o lo que verifica el PAC al timbrar. Cada regla se publica con su estado y su motivo (`GET /api/validaciones/reglas`), así que ninguna se aprueba en silencio. Las cinco parciales:
+
+- `CFDI40151` y `CFDI40154`: solo el RFC genérico extranjero (`XEXX010101000`) puede traer `ResidenciaFiscal` y `NumRegIdTrib`.
+- `CFDI40164`: solo las claves que el catálogo marca con «Sí» para IVA o IEPS trasladado (el catálogo no trae retenciones por clave).
+- `CFDI40189` y `CFDI40193`: solo con el RFC `EXT990101NI1` (nombre y domicilio).
+
+`CFDI40209` tiene la misma condición que `CFDI40206` y se informa una sola vez, con ese código. Un error del esquema en el mismo nodo y atributo que una regla del SAT se descarta: queda el código de la matriz, que es el que explica qué corregir.
+
+Un complemento que la app no trae en sus esquemas (Pagos, Nómina, Comercio Exterior...) no invalida el CFDI: el complemento queda sin revisar con una advertencia `CMP004`. Un CFDI ya timbrado se acepta porque el esquema del Timbre Fiscal Digital sí está cargado.
 
 ---
 
@@ -207,7 +217,8 @@ Los códigos y textos de cada regla se copian de la matriz de errores oficial de
 | `GET /api/emisores-prueba` | Emisores de los CSD de prueba del SAT: RFC, nombre, régimen y código postal |
 | `POST /api/comprobantes/calculo` | Vista previa: recibe el comprobante en JSON y devuelve importes, impuestos y totales, con los errores de entrada por campo |
 | `POST /api/comprobantes` | Genera y sella con el emisor de prueba elegido: `{ xml, cadenaOriginal, sello, noCertificado, calculo, validacion }` |
-| `POST /api/validaciones` | Recibe el XML en el cuerpo (`application/xml`) y devuelve el reporte de validación |
+| `POST /api/validaciones` | Recibe el XML en el cuerpo (`application/xml` o `text/xml`, hasta 2 MB) y devuelve el reporte: `{ esValido, hallazgos, selloValido, cadenaOriginal, certificado }`. Un XML con errores es un 200 con sus hallazgos, no un error de la solicitud |
+| `GET /api/validaciones/reglas` | Las 129 reglas de la matriz de errores y lo que la app hace con cada una (`revisada`, `parcial` o `noRevisada`, con su motivo) |
 | `GET /api/catalogos` · `GET /api/catalogos/{nombre}?q=&pagina=&tamano=` | Versión y tamaño de los catálogos, y búsqueda paginada de claves |
 | `GET /api/openapi/v1.json` · `GET /api/scalar` | La descripción OpenAPI y la página para probar la API |
 
@@ -293,7 +304,7 @@ Prácticas, las mismas que en Mediateca:
 
 Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase 0 se trabaja con ramas y pull requests.
 
-**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`) y la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica; 193 pruebas unitarias y 33 de integración). Lo siguiente: la fase 3 (el motor de reglas del validador y `POST /api/validaciones`).
+**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) y la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`). Van 355 pruebas unitarias y 50 de integración. Lo siguiente: la fase 4 (Angular para generar y validar).
 
 ### Fase 0. Base del proyecto
 - [x] Confirmar las decisiones de la sección 14.
@@ -328,11 +339,11 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 **Entregable:** un CFDI de ingreso sellado con un CSD de prueba pasa el XSD y su sello verifica.
 
 ### Fase 3. Validador
-- [ ] Lectura segura del XML: XXE, tamaño y versión.
-- [ ] Motor de reglas y reporte.
-- [ ] Reglas de comprobante, emisor y receptor, conceptos, impuestos, y sello y certificado, con sus códigos de la matriz.
-- [ ] `POST /api/validaciones`.
-- [ ] Pruebas por regla y XML de ejemplo con errores conocidos.
+- [x] Lectura segura del XML: sin DTD ni resolver, tope de 2 MB (también con el cuerpo sin longitud) y versión. Los errores de XML mal formado salen en español, con la línea (`TraductorXml`, `CMP001`).
+- [x] Motor de reglas y reporte (`MotorDeReglas`, `ContextoValidacion`: los catálogos que usan las reglas se consultan una vez por XML).
+- [x] Reglas de comprobante, emisor y receptor, conceptos, impuestos, complementos, y sello y certificado, con sus códigos de la matriz: de las 129, 103 completas, 5 parciales y 21 no revisadas, cada una con su motivo (`ReglasSat`).
+- [x] `POST /api/validaciones` (`application/xml` y `text/xml`, charset declarado o UTF-8 con BOM; 400, 413 y 415 como `ProblemDetails`) y `GET /api/validaciones/reglas`.
+- [x] Pruebas por regla y XML de ejemplo con errores conocidos: un error sembrado para cada una de 104 reglas (109 casos, cada uno firmado de nuevo para que solo falle lo sembrado), la cobertura de las 129 reglas, 21 XML rotos explicados, los avisos de fecha y complementos, y todos los XML de referencia sin falsos positivos. 162 pruebas unitarias nuevas y 17 de integración.
 
 **Entregable:** un XML con errores sembrados devuelve cada error con su código, nodo y mensaje.
 
@@ -404,7 +415,7 @@ Confirmadas el 21 de noviembre de 2026:
 | Los CSD de prueba vencen (el 18 de mayo de 2027) o el SAT los reemplaza | Versionados con su vigencia, que `GET /api/emisores-prueba` muestra; el README explica cómo cambiarlos y, para regenerar `Referencia/`, un script |
 | Carga y consulta de los catálogos grandes | PostgreSQL con índices `pg_trgm`; siembra idempotente con huella y candado; healthcheck con `start_period` para la primera carga (unos 14 s, medida en la fase 1) |
 | Las pruebas de integración y la CI necesitan Docker | Testcontainers levanta un PostgreSQL desechable; GitHub Actions ya trae Docker |
-| Reglas que dependen del padrón del SAT (nombre, régimen y código postal reales del receptor) | Quedan fuera y la app lo explica: valida forma y consistencia, no existencia |
+| Reglas que dependen del padrón del SAT (nombre, régimen y código postal reales del receptor) | Quedan fuera (21 de las 129 reglas) y la app lo explica: valida forma y consistencia, no existencia. `GET /api/validaciones/reglas` las lista con su motivo |
 
 ---
 
