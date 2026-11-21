@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Línea de comandos para mantener los archivos del SAT: convierte el Excel de catálogos y la matriz de
+       errores a los CSV de sat/. Es lo único del proyecto que depende de ExcelDataReader. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Comprobante.Herramientas</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExcelDataReader" Version="3.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Comprobante.UnitTests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,198 @@
+{
+  "archivo": "catCFDI_V_4_20261120.xls",
+  "publicacion": "2026-11-20",
+  "sha256": "b8c156b356d378ab1f31b319a74b8caf04267b33edf04c910b9715474af96571",
+  "catalogos": [
+    {
+      "archivo": "forma_pago.csv",
+      "hojas": [
+        "c_FormaPago"
+      ],
+      "filas": 22,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "moneda.csv",
+      "hojas": [
+        "c_Moneda"
+      ],
+      "filas": 183,
+      "version": "1",
+      "revision": "1",
+      "publicacion": null
+    },
+    {
+      "archivo": "tipo_de_comprobante.csv",
+      "hojas": [
+        "c_TipoDeComprobante"
+      ],
+      "filas": 5,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "exportacion.csv",
+      "hojas": [
+        "c_Exportacion"
+      ],
+      "filas": 4,
+      "version": "2",
+      "revision": "1",
+      "publicacion": "2022-02-24"
+    },
+    {
+      "archivo": "metodo_pago.csv",
+      "hojas": [
+        "c_MetodoPago"
+      ],
+      "filas": 2,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "codigo_postal.csv",
+      "hojas": [
+        "c_CodigoPostal_Parte_1",
+        "c_CodigoPostal_Parte_2"
+      ],
+      "filas": 95748,
+      "version": "1",
+      "revision": "8",
+      "publicacion": "2026-01-22"
+    },
+    {
+      "archivo": "periodicidad.csv",
+      "hojas": [
+        "c_Periodicidad"
+      ],
+      "filas": 5,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "meses.csv",
+      "hojas": [
+        "c_Meses"
+      ],
+      "filas": 18,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "tipo_relacion.csv",
+      "hojas": [
+        "c_TipoRelacion"
+      ],
+      "filas": 7,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "regimen_fiscal.csv",
+      "hojas": [
+        "c_RegimenFiscal"
+      ],
+      "filas": 19,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "pais.csv",
+      "hojas": [
+        "c_Pais"
+      ],
+      "filas": 250,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "uso_cfdi.csv",
+      "hojas": [
+        "c_UsoCFDI"
+      ],
+      "filas": 24,
+      "version": "2",
+      "revision": "0",
+      "publicacion": "2023-04-22"
+    },
+    {
+      "archivo": "clave_prod_serv.csv",
+      "hojas": [
+        "c_ClaveProdServ"
+      ],
+      "filas": 52513,
+      "version": "2",
+      "revision": "2",
+      "publicacion": "2025-12-31"
+    },
+    {
+      "archivo": "clave_unidad.csv",
+      "hojas": [
+        "c_ClaveUnidad"
+      ],
+      "filas": 2418,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "objeto_imp.csv",
+      "hojas": [
+        "c_ObjetoImp"
+      ],
+      "filas": 8,
+      "version": "4",
+      "revision": "0",
+      "publicacion": "2024-12-13"
+    },
+    {
+      "archivo": "impuesto.csv",
+      "hojas": [
+        "c_Impuesto"
+      ],
+      "filas": 3,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "tipo_factor.csv",
+      "hojas": [
+        "c_TipoFactor"
+      ],
+      "filas": 3,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    },
+    {
+      "archivo": "tasa_o_cuota.csv",
+      "hojas": [
+        "c_TasaOCuota"
+      ],
+      "filas": 19,
+      "version": "4",
+      "revision": "0",
+      "publicacion": "2025-12-31"
+    },
+    {
+      "archivo": "estado.csv",
+      "hojas": [
+        "c_Estado"
+      ],
+      "filas": 95,
+      "version": "1",
+      "revision": "0",
+      "publicacion": null
+    }
+  ]
+}

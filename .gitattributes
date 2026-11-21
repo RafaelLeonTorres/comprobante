@@ -8,4 +8,5 @@
 # de sat/fuentes.json sigue valiendo en cualquier sistema operativo.
 /sat/esquemas/** -text
 /sat/xslt/** -text
-/sat/csd-prueba/** binary
+/sat/csd-prueba/*.cer binary
+/sat/csd-prueba/*.key binary
