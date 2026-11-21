@@ -141,7 +141,8 @@ public sealed class ValidadorCfdi(ICatalogos catalogos, TimeProvider reloj)
                 Severidad.Error,
                 RutaXml.De(raiz),
                 null,
-                $"No se pudo calcular la cadena original: {ex.Message}"));
+                $"No se pudo calcular la cadena original: {ex.Message}",
+                Linea: raiz.Linea()));
         }
 
         var certificadoTexto = raiz.Attribute("Certificado")?.Value;
@@ -158,7 +159,8 @@ public sealed class ValidadorCfdi(ICatalogos catalogos, TimeProvider reloj)
                 Severidad.Error,
                 RutaXml.De(raiz),
                 "Certificado",
-                "El certificado no cumple con alguno de los valores permitidos: el atributo debe contener un archivo .cer válido."));
+                "El certificado no cumple con alguno de los valores permitidos: el atributo debe contener un archivo .cer válido.",
+                Linea: raiz.Attribute("Certificado").Linea()));
             return (cadena, null, null);
         }
 
@@ -177,7 +179,8 @@ public sealed class ValidadorCfdi(ICatalogos catalogos, TimeProvider reloj)
                 Severidad.Error,
                 RutaXml.De(raiz),
                 "Sello",
-                "El resultado de la digestión debe ser igual al resultado de la desencripción del sello: el sello no corresponde a la cadena original de este XML con el certificado que trae."));
+                "El resultado de la digestión debe ser igual al resultado de la desencripción del sello: el sello no corresponde a la cadena original de este XML con el certificado que trae.",
+                Linea: raiz.Attribute("Sello").Linea()));
         }
 
         return (cadena, valido, datos);

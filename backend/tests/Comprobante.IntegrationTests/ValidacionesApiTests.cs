@@ -99,6 +99,7 @@ public class ValidacionesApiTests(ApiFactory api)
         Assert.False(reporte.GetProperty("esValido").GetBoolean());
         Assert.False(reporte.GetProperty("selloValido").GetBoolean());
         Assert.Equal(["CFDI40119", "CFDI40102"], Codigos(reporte));
+        Assert.All(reporte.GetProperty("hallazgos").EnumerateArray(), h => Assert.True(h.GetProperty("linea").GetInt32() > 0));
         var total = reporte.GetProperty("hallazgos")[0];
         Assert.Equal("error", total.GetProperty("severidad").GetString());
         Assert.Equal("cfdi:Comprobante", total.GetProperty("nodo").GetString());

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Xml;
 using System.Xml.Linq;
 using Comprobante.Core.Calculo;
 using Comprobante.Core.Xml;
@@ -9,6 +10,10 @@ namespace Comprobante.Core.Validacion.Reglas;
 internal static class ExtensionesXml
 {
     private static readonly XNamespace Cfdi = EscritorCfdi.EspacioCfdi;
+
+    /// <summary>La línea del XML donde empieza el nodo o el atributo; nula si no hay objeto o el documento se leyó sin líneas.</summary>
+    public static int? Linea(this XObject? objeto) =>
+        objeto is IXmlLineInfo { } informacion && informacion.HasLineInfo() ? informacion.LineNumber : null;
 
     /// <summary>El valor de un atributo sin espacio de nombres, o nulo si no está.</summary>
     public static string? Valor(this XElement elemento, string atributo) => elemento.Attribute(atributo)?.Value;

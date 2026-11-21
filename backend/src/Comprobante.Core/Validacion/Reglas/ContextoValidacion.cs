@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Xml;
 using System.Xml.Linq;
 using Comprobante.Core.Catalogos;
 using Comprobante.Core.Xml;
@@ -111,7 +110,6 @@ internal sealed class ContextoValidacion
         }
 
         XObject origen = atributo is not null && nodo.Attribute(atributo) is { } a ? a : nodo;
-        var informacion = (IXmlLineInfo)origen;
         _hallazgos.Add(new Hallazgo(
             codigo,
             severidad,
@@ -120,7 +118,7 @@ internal sealed class ContextoValidacion
             mensaje,
             encontrado,
             esperado,
-            informacion.HasLineInfo() ? informacion.LineNumber : null));
+            origen.Linea()));
     }
 
     /// <summary>

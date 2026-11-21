@@ -44,6 +44,7 @@ public class ValidadorCfdiTests(CatalogosFixture catalogos)
         Assert.Equal(Severidad.Error, hallazgo.Severidad);
         Assert.Equal("Sello", hallazgo.Atributo);
         Assert.Equal("cfdi:Comprobante", hallazgo.Nodo);
+        Assert.True(hallazgo.Linea > 0);
     }
 
     [Fact]
@@ -86,6 +87,7 @@ public class ValidadorCfdiTests(CatalogosFixture catalogos)
         var hallazgo = Assert.Single(reporte.Hallazgos);
         Assert.Equal("CFDI40106", hallazgo.Codigo);
         Assert.Equal("Certificado", hallazgo.Atributo);
+        Assert.True(hallazgo.Linea > 0);
     }
 
     [Fact]

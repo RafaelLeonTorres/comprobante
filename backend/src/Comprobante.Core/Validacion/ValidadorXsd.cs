@@ -1,6 +1,7 @@
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
+using Comprobante.Core.Validacion.Reglas;
 using Comprobante.Core.Xml;
 
 namespace Comprobante.Core.Validacion;
@@ -69,13 +70,12 @@ internal static class ValidadorXsd
 
         // Cuando falla un atributo, el remitente es el atributo (o el elemento si falta): el nombre ya viene en el mensaje.
         atributo ??= (objeto as XAttribute)?.Name.LocalName;
-        int? linea = objeto is IXmlLineInfo { } info && info.HasLineInfo() ? info.LineNumber : null;
         return new Hallazgo(
             Codigos.Esquema,
             args.Severity == XmlSeverityType.Warning ? Severidad.Advertencia : Severidad.Error,
             objeto is null ? string.Empty : RutaXml.De(objeto),
             atributo,
             mensaje,
-            Linea: linea);
+            Linea: objeto.Linea());
     }
 }
