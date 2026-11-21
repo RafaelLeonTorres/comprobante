@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- El núcleo: modelo, cálculo, XML, cadena original, sello y validador. Sin paquetes de terceros (solo
+       System.Xml y System.Security.Cryptography del framework), así se puede usar como librería. -->
+  <PropertyGroup>
+    <RootNamespace>Comprobante.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>

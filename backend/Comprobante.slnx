@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Comprobante.Api/Comprobante.Api.csproj" />
+    <Project Path="src/Comprobante.Catalogos/Comprobante.Catalogos.csproj" />
+    <Project Path="src/Comprobante.Core/Comprobante.Core.csproj" />
+    <Project Path="src/Comprobante.Herramientas/Comprobante.Herramientas.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Comprobante.IntegrationTests/Comprobante.IntegrationTests.csproj" />
+    <Project Path="tests/Comprobante.UnitTests/Comprobante.UnitTests.csproj" />
+  </Folder>
+</Solution>

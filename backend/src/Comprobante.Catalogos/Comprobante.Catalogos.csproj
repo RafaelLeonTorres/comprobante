@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Los catálogos del SAT en PostgreSQL con EF Core: entidades, migraciones, carga desde los CSV de sat/catalogos
+       y consultas. Implementa ICatalogos, la interfaz que usa el núcleo. -->
+  <PropertyGroup>
+    <RootNamespace>Comprobante.Catalogos</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Comprobante.Core\Comprobante.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Los CSV de sat/catalogos viajan dentro del ensamblado: así el contenedor de la API no necesita montar archivos. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\sat\catalogos\*.csv" LogicalName="catalogos/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\..\sat\catalogos\version.json" LogicalName="catalogos/version.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Comprobante.UnitTests" />
+    <InternalsVisibleTo Include="Comprobante.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="11.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
