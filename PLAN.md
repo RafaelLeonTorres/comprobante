@@ -459,7 +459,7 @@ La plantilla, de arriba abajo (hoja carta, márgenes de 12 mm, la identidad de l
 
 **Entregable:** el proyecto aparece terminado en el sitio, con su artículo y el enlace al código.
 
-**Verificado:** `bundle exec jekyll build` con el Gemfile del sitio (`github-pages`, Jekyll 3.10 y Liquid 4.0.4, el motor de GitHub Pages) termina sin errores. Las dos páginas salen con sus cuatro imágenes, sus 22 bloques de código, con el HTML de Angular y sus llaves dobles intacto (Liquid no lo toca), y la portada enlaza el título al artículo y «Código» al repositorio, igual que Mediateca. `npm test` y `npm run check` del sitio solo cubren el laboratorio, así que este cambio no los toca. Falta subir la rama y unirla a `main` (lo hace el dueño del proyecto).
+**Verificado:** `bundle exec jekyll build` con el Gemfile del sitio (`github-pages`, Jekyll 3.10 y Liquid 4.0.4, el motor de GitHub Pages) termina sin errores. Las dos páginas salen con sus cuatro imágenes, sus 11 bloques de código, con el HTML de Angular y sus llaves dobles intacto (Liquid no lo toca), y la portada enlaza el título al artículo y «Código» al repositorio, igual que Mediateca. `npm test` y `npm run check` del sitio solo cubren el laboratorio, así que este cambio no los toca. Falta subir la rama y unirla a `main` (lo hace el dueño del proyecto).
 
 ### Extensiones (después del MVP)
 - [ ] Complemento de Pagos 2.0: generar y validar.
