@@ -52,7 +52,7 @@ Lo que **no** hace: timbrar, cancelar ni consultar el estatus en el SAT; comprob
 
 ## Estado
 
-Las fases 0 a 6 están terminadas: base del proyecto, catálogos y cálculo, XML y sello, validador, la interfaz en Angular, la seguridad y el pulido (límites de solicitudes, cabeceras y CSP, registros sin datos del usuario, tema oscuro y revisión de contraste y teclado) y la representación impresa en PDF (plantilla propia con logo, código QR del SAT y límites propios; el boceto del que partió está en [docs/plantilla-pdf](docs/plantilla-pdf/)). Faltan dos cosas: probar la interfaz y los PDF con un lector de pantalla, que tiene que hacer una persona, y la fase 7, el cierre para el portafolio. El plan completo, con las fases, las decisiones y los criterios de aceptación, está en [PLAN.md](PLAN.md).
+Las fases 0 a 6 están terminadas: base del proyecto, catálogos y cálculo, XML y sello, validador, la interfaz en Angular, la seguridad y el pulido (límites de solicitudes, cabeceras y CSP, registros sin datos del usuario, tema oscuro y revisión de contraste y teclado) y la representación impresa en PDF (plantilla propia con logo, código QR del SAT y límites propios; el boceto del que partió está en [docs/plantilla-pdf](docs/plantilla-pdf/)). La fase 7 (el cierre para el portafolio) tiene hecho este README y le falta decidir si habrá una demo pública. Faltan además la fase 8, ponerlo en [mi sitio](https://rafaelleontorres.github.io/mi-sitio2/) como Mediateca, y probar la interfaz y los PDF con un lector de pantalla, que tiene que hacer una persona. El plan completo, con las fases, las decisiones y los criterios de aceptación, está en [PLAN.md](PLAN.md).
 
 ## Cómo está armado
 
