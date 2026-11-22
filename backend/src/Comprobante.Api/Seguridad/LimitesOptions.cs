@@ -11,6 +11,12 @@ internal sealed class LimitesOptions
     /// <summary>Lo más que pesa el JSON de cálculo y de generación. El XML a validar tiene su propio límite, de 2 MB.</summary>
     public int JsonMaximoBytes { get; set; } = 1_048_576;
 
+    /// <summary>
+    /// Cuántos PDF se dibujan a la vez en toda la API. Dibujar gasta procesador y memoria: con todos los lugares ocupados la
+    /// solicitud no espera, se rechaza con 429 y el cliente reintenta.
+    /// </summary>
+    public int PdfSimultaneos { get; set; } = 4;
+
     public SolicitudesPorMinuto Solicitudes { get; set; } = new();
 }
 
@@ -22,6 +28,9 @@ internal sealed class SolicitudesPorMinuto
 
     /// <summary><c>POST /api/validaciones</c>: revisa un XML.</summary>
     public int Validar { get; set; } = 30;
+
+    /// <summary><c>POST /api/representaciones/pdf</c>: dibuja el PDF de un comprobante.</summary>
+    public int Pdf { get; set; } = 10;
 
     /// <summary><c>POST /api/comprobantes/calculo</c>: los totales en vivo mandan hasta 2,5 solicitudes por segundo.</summary>
     public int Calcular { get; set; } = 240;

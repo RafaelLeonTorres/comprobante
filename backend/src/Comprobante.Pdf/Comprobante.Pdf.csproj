@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- La representación impresa en PDF: dibuja lo que arma ConstructorDeRepresentacion (en el núcleo, que sigue sin
+       paquetes de terceros). Aquí viven QuestPDF (licencia Community) y QRCoder. -->
+  <PropertyGroup>
+    <RootNamespace>Comprobante.Pdf</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QuestPDF" Version="2026.9.2" />
+    <PackageReference Include="QRCoder" Version="1.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Comprobante.Core\Comprobante.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Las fuentes y el logo viajan dentro del ensamblado: el PDF sale igual en cualquier equipo y contenedor, sin depender
+       de las fuentes del sistema. Las fuentes son Atkinson Hyperlegible (licencia OFL, ver Fuentes/LEEME.md). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Fuentes\*.ttf" LogicalName="fuentes/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Recursos\logo.svg" LogicalName="recursos/logo.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Comprobante.UnitTests" />
+    <InternalsVisibleTo Include="Comprobante.IntegrationTests" />
+  </ItemGroup>
+
+</Project>

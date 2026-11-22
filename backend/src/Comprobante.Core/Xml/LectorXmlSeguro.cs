@@ -21,6 +21,15 @@ public static class LectorXmlSeguro
         IgnoreProcessingInstructions = true,
     };
 
+    /// <summary>Explica en español por qué no se pudo leer un XML, con la línea donde falló.</summary>
+    public static string Explicar(XmlException excepcion)
+    {
+        var motivo = Validacion.TraductorXml.Motivo(excepcion.Message);
+        return excepcion.LineNumber > 0
+            ? $"El XML no se pudo leer (línea {excepcion.LineNumber}): {motivo}"
+            : $"El XML no se pudo leer: {motivo}";
+    }
+
     /// <summary>Carga el XML. Lanza <see cref="XmlException"/> si no está bien formado, trae un DTD o es demasiado grande.</summary>
     public static XDocument Cargar(string xml, long maximoCaracteres = TamanoMaximoPorOmision)
     {

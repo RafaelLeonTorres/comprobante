@@ -3,13 +3,16 @@ using Comprobante.Api;
 using Comprobante.Api.Catalogos;
 using Comprobante.Api.Comprobantes;
 using Comprobante.Api.Errores;
+using Comprobante.Api.Representaciones;
 using Comprobante.Api.Seguridad;
 using Comprobante.Api.Validaciones;
 using Comprobante.Catalogos;
 using Comprobante.Core.Calculo;
 using Comprobante.Core.Generacion;
+using Comprobante.Core.Representacion;
 using Comprobante.Core.Sello;
 using Comprobante.Core.Validacion;
+using Microsoft.AspNetCore.Http.Features;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +38,18 @@ builder.Services.AddSingleton<ServicioCalculo>();
 builder.Services.AddSingleton<EmisoresDePrueba>();
 builder.Services.AddSingleton<ValidadorCfdi>();
 builder.Services.AddSingleton<ServicioGeneracion>();
+builder.Services.AddSingleton<ConstructorDeRepresentacion>();
+builder.Services.AddSingleton<ServicioDePdf>();
+
+// El único formulario de la API es el del PDF (XML y logo): hasta tres campos, todo en memoria (sin archivos temporales
+// en disco) y nada más grande de lo que ese endpoint acepta.
+builder.Services.Configure<FormOptions>(opciones =>
+{
+    opciones.ValueCountLimit = 8;
+    opciones.MultipartBodyLengthLimit = EndpointsRepresentaciones.TamanoMaximoDelFormularioEnBytes;
+    opciones.MemoryBufferThreshold = EndpointsRepresentaciones.TamanoMaximoDelFormularioEnBytes;
+    opciones.BufferBodyLengthLimit = EndpointsRepresentaciones.TamanoMaximoDelFormularioEnBytes;
+});
 
 builder.Services.ConfigureHttpJsonOptions(opciones =>
     opciones.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
@@ -43,7 +58,7 @@ builder.Services.ConfigureHttpJsonOptions(opciones =>
 builder.Services.Configure<RouteHandlerOptions>(opciones => opciones.ThrowOnBadRequest = false);
 builder.Services.AddProblemasEnEspanol();
 builder.Services.AddLimiteDeSolicitudes();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(opciones => opciones.DescribirElPdf());
 
 var app = builder.Build();
 
@@ -66,6 +81,7 @@ app.MapGet("/api/health", () => Results.Ok(new { estado = "ok" }))
 app.MapCatalogos();
 app.MapComprobantes();
 app.MapValidaciones();
+app.MapRepresentaciones();
 
 app.Run();
 

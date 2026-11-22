@@ -9,7 +9,7 @@ namespace Comprobante.Api.Seguridad;
 
 /// <summary>
 /// Límite de solicitudes por IP y por minuto, con ventana deslizante: una cubeta para cada tipo de operación (generar,
-/// validar, calcular y consultar) y un total para todo lo demás. Al pasarse responde 429 con <c>Retry-After</c>.
+/// validar, calcular, consultar y dibujar el PDF) y un total para todo lo demás. Al pasarse responde 429 con <c>Retry-After</c>.
 /// La API solo se publica en 127.0.0.1 y detrás de nginx, que pasa la IP real en <c>X-Forwarded-For</c>
 /// (<c>ASPNETCORE_FORWARDEDHEADERS_ENABLED</c> en docker-compose.yml): aquí ya llega como la IP de la conexión.
 /// </summary>
@@ -19,6 +19,7 @@ internal static class LimiteDeSolicitudes
     public const string Validar = "validar";
     public const string Calcular = "calcular";
     public const string Consultar = "consultar";
+    public const string Pdf = "pdf";
 
     private const string Categoria = "Comprobante.Api.Seguridad.LimiteDeSolicitudes";
     private const int SegmentosPorVentana = 6;
@@ -37,6 +38,7 @@ internal static class LimiteDeSolicitudes
             opciones.AddPolicy(Validar, contexto => PorIp(contexto, Validar, l => l.Validar));
             opciones.AddPolicy(Calcular, contexto => PorIp(contexto, Calcular, l => l.Calcular));
             opciones.AddPolicy(Consultar, contexto => PorIp(contexto, Consultar, l => l.Consultar));
+            opciones.AddPolicy(Pdf, contexto => PorIp(contexto, Pdf, l => l.Pdf));
 
             opciones.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(contexto =>
                 contexto.Request.Path.StartsWithSegments("/api/health")

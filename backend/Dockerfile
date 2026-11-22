@@ -10,6 +10,7 @@ COPY global.json ./
 COPY backend/Directory.Build.props backend/
 COPY backend/src/Comprobante.Core/Comprobante.Core.csproj backend/src/Comprobante.Core/
 COPY backend/src/Comprobante.Catalogos/Comprobante.Catalogos.csproj backend/src/Comprobante.Catalogos/
+COPY backend/src/Comprobante.Pdf/Comprobante.Pdf.csproj backend/src/Comprobante.Pdf/
 COPY backend/src/Comprobante.Api/Comprobante.Api.csproj backend/src/Comprobante.Api/
 RUN dotnet restore backend/src/Comprobante.Api/Comprobante.Api.csproj
 

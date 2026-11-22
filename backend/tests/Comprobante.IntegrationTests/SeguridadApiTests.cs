@@ -120,6 +120,45 @@ public sealed class SeguridadApiTests(ApiFactory api) : IDisposable
     }
 
     [Fact]
+    public async Task El_pdf_tiene_su_propia_cubeta_por_IP()
+    {
+        var http = ClienteConLimites(("Solicitudes:Pdf", "2"));
+
+        // Un XML que no es un CFDI responde 400, pero la solicitud ya gastó cuota: el límite se aplica antes de leer nada.
+        for (var i = 0; i < 2; i++)
+        {
+            using var formulario = RepresentacionesApiTests.Formulario("<otra-cosa/>");
+            using var respuesta = await http.PostAsync("/api/representaciones/pdf", formulario);
+            Assert.Equal(HttpStatusCode.BadRequest, respuesta.StatusCode);
+        }
+
+        using var cuarto = RepresentacionesApiTests.Formulario("<otra-cosa/>");
+        using var rechazada = await http.PostAsync("/api/representaciones/pdf", cuarto);
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, rechazada.StatusCode);
+        Assert.InRange(int.Parse(rechazada.Headers.GetValues("Retry-After").Single()), 1, 60);
+        Assert.Equal(HttpStatusCode.OK, await EstadoAsync(http, Emisores)); // las demás cubetas siguen libres
+    }
+
+    [Fact]
+    public async Task Con_todos_los_lugares_de_pdf_ocupados_responde_429_en_vez_de_hacer_fila()
+    {
+        var http = ClienteConLimites(("PdfSimultaneos", "1"), ("Solicitudes:Pdf", "1000"));
+        var xml = await new RepresentacionesApiTests(api).GenerarXmlConConceptosAsync(1500); // más de un segundo de dibujo
+
+        var resultados = await Task.WhenAll(Enumerable.Range(0, 4).Select(async _ =>
+        {
+            using var formulario = RepresentacionesApiTests.Formulario(xml);
+            using var respuesta = await http.PostAsync("/api/representaciones/pdf", formulario);
+            return (respuesta.StatusCode, EsperaEnSegundos: respuesta.Headers.RetryAfter?.Delta?.TotalSeconds);
+        }));
+
+        Assert.All(resultados, r => Assert.True(r.StatusCode is HttpStatusCode.OK or HttpStatusCode.TooManyRequests, $"Respondió {r.StatusCode}."));
+        Assert.Contains(resultados, r => r.StatusCode == HttpStatusCode.OK);
+        Assert.Contains(resultados, r => r.StatusCode == HttpStatusCode.TooManyRequests && r.EsperaEnSegundos == 3);
+    }
+
+    [Fact]
     public async Task El_limite_global_cuenta_todas_las_solicitudes_de_la_IP()
     {
         var http = ClienteConLimites(("Solicitudes:Global", "2"));

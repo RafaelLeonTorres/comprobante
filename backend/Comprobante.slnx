@@ -3,6 +3,7 @@
     <Project Path="src/Comprobante.Api/Comprobante.Api.csproj" />
     <Project Path="src/Comprobante.Catalogos/Comprobante.Catalogos.csproj" />
     <Project Path="src/Comprobante.Core/Comprobante.Core.csproj" />
+    <Project Path="src/Comprobante.Pdf/Comprobante.Pdf.csproj" />
     <Project Path="src/Comprobante.Herramientas/Comprobante.Herramientas.csproj" />
   </Folder>
   <Folder Name="/tests/">

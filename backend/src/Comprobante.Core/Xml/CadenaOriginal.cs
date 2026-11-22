@@ -13,8 +13,13 @@ namespace Comprobante.Core.Xml;
 public static class CadenaOriginal
 {
     private const string DireccionDelXslt = ResolverSat.DireccionBase + "cfd/4/cadenaoriginal_4_0/cadenaoriginal_4_0.xslt";
+    private const string DireccionDelXsltDelTimbre = ResolverSat.DireccionBase + "cfd/TimbreFiscalDigital/cadenaoriginal_TFD_1_1.xslt";
 
-    private static readonly Lazy<XslCompiledTransform> Transformacion = new(Cargar, LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<XslCompiledTransform> Transformacion =
+        new(() => Cargar("sat/xslt/cadenaoriginal_4_0.xslt", DireccionDelXslt), LazyThreadSafetyMode.ExecutionAndPublication);
+
+    private static readonly Lazy<XslCompiledTransform> TransformacionDelTimbre =
+        new(() => Cargar("sat/xslt/cadenaoriginal_TFD_1_1.xslt", DireccionDelXsltDelTimbre), LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>La cadena original de este XML, con las barras: <c>||4.0|A|1|2026-...||</c>.</summary>
     public static string Generar(XDocument documento)
@@ -25,15 +30,27 @@ public static class CadenaOriginal
         return salida.ToString();
     }
 
-    private static XslCompiledTransform Cargar()
+    /// <summary>
+    /// La cadena original del Timbre Fiscal Digital que el PAC agrega al comprobante (<c>tfd:TimbreFiscalDigital</c>):
+    /// <c>||1.1|UUID|FechaTimbrado|RfcProvCertif|SelloCFD|NoCertificadoSAT||</c>. Es la que firma el SAT para obtener su sello.
+    /// </summary>
+    public static string DelTimbre(XElement timbre)
+    {
+        using var entrada = new XDocument(new XElement(timbre)).CreateReader();
+        using var salida = new StringWriter(CultureInfo.InvariantCulture);
+        TransformacionDelTimbre.Value.Transform(entrada, null, salida);
+        return salida.ToString();
+    }
+
+    private static XslCompiledTransform Cargar(string recurso, string direccion)
     {
         // Los XSLT del SAT se declaran como 2.0, pero usan lo que también existe en 1.0 (normalize-space, concat...),
         // que es lo que implementa XslCompiledTransform. Las pruebas lo comprueban con cadenas calculadas aparte.
-        using var flujo = RecursosSat.Abrir("sat/xslt/cadenaoriginal_4_0.xslt");
+        using var flujo = RecursosSat.Abrir(recurso);
         using var lector = XmlReader.Create(
             flujo,
             new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null },
-            DireccionDelXslt);
+            direccion);
         var transformacion = new XslCompiledTransform();
         transformacion.Load(lector, new XsltSettings(enableDocumentFunction: false, enableScript: false), new ResolverSat());
         return transformacion;

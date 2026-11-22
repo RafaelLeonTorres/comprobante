@@ -25,7 +25,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         // Todas las pruebas comparten una API (y una IP): con los límites de solicitudes de verdad, las últimas se toparían
         // con el 429. SeguridadApiTests los baja en su propia copia de la API.
-        foreach (var cubeta in new[] { "Generar", "Validar", "Calcular", "Consultar", "Global" })
+        foreach (var cubeta in new[] { "Generar", "Validar", "Calcular", "Consultar", "Pdf", "Global" })
         {
             builder.UseSetting($"Limites:Solicitudes:{cubeta}", "1000000");
         }
