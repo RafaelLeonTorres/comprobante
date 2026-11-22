@@ -210,6 +210,125 @@ public class CasosExtremosPdfTests(CatalogosFixture catalogos)
         Assert.Contains(SinEspacios(SelloSatDePrueba), SinEspacios(Texto(pdf)), StringComparison.Ordinal);
     }
 
+    private static readonly HashSet<string> AtributosNumericos =
+    [
+        "SubTotal", "Descuento", "Total", "TipoCambio", "Cantidad", "ValorUnitario", "Importe", "Base", "TasaOCuota",
+        "TotalImpuestosTrasladados", "TotalImpuestosRetenidos",
+    ];
+
+    /// <summary>Pone <paramref name="valor"/> en todos los atributos de importes, tasas y cantidades del comprobante.</summary>
+    private static void PonerEnLosNumeros(XDocument documento, string valor)
+    {
+        foreach (var atributo in documento.Descendants().Attributes().Where(a => AtributosNumericos.Contains(a.Name.LocalName)).ToList())
+        {
+            atributo.Value = valor;
+        }
+    }
+
+    private static bool EsUnPdf(byte[] pdf) => pdf.AsSpan(0, 5).SequenceEqual("%PDF-"u8);
+
+    [Theory]
+    [InlineData("abc")]
+    [InlineData("")]
+    [InlineData("1e5")]
+    [InlineData("-5")]
+    [InlineData("NaN")]
+    [InlineData("1,000.00")]
+    public async Task Los_importes_que_no_son_numeros_no_rompen_el_pdf_ni_el_codigo_qr(string valor)
+    {
+        // La app dibuja lo que dice el XML, sin revisar sus reglas: un valor absurdo sale como viene.
+        foreach (var documento in new[] { SinTimbre(), ConTimbre() })
+        {
+            PonerEnLosNumeros(documento, valor);
+
+            var pdf = await GenerarAsync(documento);
+
+            Assert.True(EsUnPdf(pdf));
+            Assert.True(Paginas(pdf) >= 1);
+        }
+    }
+
+    [Theory]
+    [InlineData("99999999999999999999999999999999")]
+    [InlineData("0.0000000000000000000000000001")]
+    public async Task Un_numero_mas_ancho_que_cualquier_columna_sale_o_dice_que_no_se_pudo_dibujar(string valor)
+    {
+        // Con 32 cifras seguidas ya no hay letra que alcance: el PDF sale o el motor avisa con PdfNoGenerableException
+        // (la API lo contesta con 422); no se vale ninguna otra excepción ni una página que no termina.
+        foreach (var documento in new[] { SinTimbre(), ConTimbre() })
+        {
+            PonerEnLosNumeros(documento, valor);
+
+            try
+            {
+                Assert.True(EsUnPdf(await GenerarAsync(documento)));
+            }
+            catch (PdfNoGenerableException)
+            {
+                // Es la respuesta prevista.
+            }
+        }
+    }
+
+    [Fact]
+    public async Task Un_total_que_no_es_un_numero_se_imprime_tal_cual_y_sin_importe_con_letra()
+    {
+        var documento = SinTimbre();
+        documento.Root!.SetAttributeValue("Total", "abc");
+
+        var texto = SinEspacios(Texto(await GenerarAsync(documento)));
+
+        Assert.Contains("abc", texto, StringComparison.Ordinal);
+        Assert.DoesNotContain("M.N.", texto, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Un_comprobante_al_que_le_falta_cualquier_atributo_o_nodo_se_dibuja_igual()
+    {
+        // La versión del nodo raíz es lo que dice que es un CFDI 4.0: sin ella el documento se rechaza antes de dibujar,
+        // igual que si faltara el nodo raíz entero. Todo lo demás puede faltar.
+        static bool Quitable(XAttribute atributo) =>
+            !atributo.IsNamespaceDeclaration && !(atributo.Parent == atributo.Document!.Root && atributo.Name.LocalName == "Version");
+
+        var fallos = new List<string>();
+        foreach (var conTimbre in new[] { false, true })
+        {
+            XDocument Nuevo() => conTimbre ? ConTimbre() : SinTimbre();
+            var modelo = Nuevo();
+            var atributos = modelo.Descendants().Attributes().Count(Quitable);
+            var nodos = modelo.Root!.Descendants().Count();
+
+            for (var i = 0; i < atributos + nodos; i++)
+            {
+                var documento = Nuevo();
+                string quitado;
+                if (i < atributos)
+                {
+                    var atributo = documento.Descendants().Attributes().Where(Quitable).ElementAt(i);
+                    quitado = $"{atributo.Parent!.Name.LocalName}@{atributo.Name.LocalName}";
+                    atributo.Remove();
+                }
+                else
+                {
+                    var nodo = documento.Root!.Descendants().ElementAt(i - atributos);
+                    quitado = nodo.Name.LocalName;
+                    nodo.Remove();
+                }
+
+                try
+                {
+                    Assert.True(EsUnPdf(await GenerarAsync(documento)));
+                }
+                catch (Exception excepcion)
+                {
+                    fallos.Add($"{(conTimbre ? "con" : "sin")} timbre, sin {quitado}: {excepcion.GetType().Name}: {excepcion.Message}");
+                }
+            }
+        }
+
+        Assert.True(fallos.Count == 0, string.Join(Environment.NewLine, fallos));
+    }
+
     [Fact]
     public async Task Un_documento_que_no_es_un_comprobante_no_se_dibuja()
     {
