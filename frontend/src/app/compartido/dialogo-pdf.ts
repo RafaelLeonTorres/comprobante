@@ -83,26 +83,32 @@ function leerComoUrl(archivo: Blob): Promise<string> {
           PDF y no se guarda.
         </p>
         <div class="elegir">
-          @if (vistaPrevia(); as vista) {
-            <img class="vista" [src]="vista" alt="Vista previa del logo elegido" />
-          }
-          <button #elegir matButton="outlined" type="button" aria-describedby="ayuda-logo" (click)="selector.click()">
-            <mat-icon svgIcon="subir" aria-hidden="true" />
-            {{ logo() ? 'Cambiar logo' : 'Elegir logo' }}
-          </button>
           @if (logo(); as elegido) {
-            <span class="nombre">{{ elegido.name }}</span>
-            <button matButton type="button" (click)="quitarLogo()">Quitar logo</button>
+            <div class="elegido">
+              @if (vistaPrevia(); as vista) {
+                <img class="vista" [src]="vista" alt="Vista previa del logo elegido" />
+              }
+              <span class="nombre">{{ elegido.name }}</span>
+            </div>
           }
-          <input
-            #selector
-            class="oculto"
-            type="file"
-            accept="image/png,image/jpeg"
-            tabindex="-1"
-            aria-hidden="true"
-            (change)="alElegir($event)"
-          />
+          <div class="botones">
+            <button #elegir matButton="outlined" type="button" aria-describedby="ayuda-logo" (click)="selector.click()">
+              <mat-icon svgIcon="subir" aria-hidden="true" />
+              {{ logo() ? 'Cambiar logo' : 'Elegir logo' }}
+            </button>
+            @if (logo()) {
+              <button matButton type="button" (click)="quitarLogo()">Quitar logo</button>
+            }
+            <input
+              #selector
+              class="oculto"
+              type="file"
+              accept="image/png,image/jpeg"
+              tabindex="-1"
+              aria-hidden="true"
+              (change)="alElegir($event)"
+            />
+          </div>
         </div>
         @if (errorDeLogo(); as mensaje) {
           <p class="error" role="alert">
@@ -175,6 +181,20 @@ function leerComoUrl(archivo: Blob): Promise<string> {
     }
 
     .elegir {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .elegido {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      max-width: 100%;
+    }
+
+    .botones {
       display: flex;
       flex-wrap: wrap;
       gap: 8px 12px;
