@@ -31,6 +31,31 @@ function esProblema(cuerpo: unknown): cuerpo is ProblemaApi {
   return typeof cuerpo === 'object' && cuerpo !== null && ('title' in cuerpo || 'detail' in cuerpo || 'errors' in cuerpo);
 }
 
+/**
+ * Con <c>responseType: 'blob'</c> el cuerpo de un error también llega como Blob. Se lee como JSON y se devuelve el mismo error
+ * con ese cuerpo, para que <c>aErrorApi</c> lo explique igual que los demás; si no es un JSON, el error queda sin cuerpo.
+ */
+export async function conCuerpoLegible(error: unknown): Promise<unknown> {
+  if (!(error instanceof HttpErrorResponse) || !(error.error instanceof Blob)) {
+    return error;
+  }
+
+  let cuerpo: unknown = null;
+  try {
+    cuerpo = JSON.parse(await error.error.text());
+  } catch {
+    // Un cuerpo que no es JSON (una página de error de un intermediario): se explica solo con el código.
+  }
+
+  return new HttpErrorResponse({
+    error: cuerpo,
+    headers: error.headers,
+    status: error.status,
+    statusText: error.statusText,
+    url: error.url ?? undefined,
+  });
+}
+
 /** Convierte lo que lance <c>HttpClient</c> (o cualquier otra cosa) en un <c>ErrorApi</c> que se pueda mostrar tal cual. */
 export function aErrorApi(error: unknown): ErrorApi {
   if (error instanceof ErrorApi) {

@@ -214,4 +214,27 @@ describe('Validar', () => {
     expect(zona.classList).not.toContain('arrastrando');
     expect(elemento.querySelector('#resultado-titulo')!.textContent).toContain('Resultado: arrastrado.xml');
   });
+
+  it('con un XML sin errores ofrece descargar su PDF', async () => {
+    const { elemento, refrescar, peticion, elegir } = pintar();
+    elegir(new File([XML], 'factura.xml'));
+    (await peticion('/api/validaciones')).flush(REPORTE_LIMPIO);
+    await refrescar();
+
+    const boton = elemento.querySelector<HTMLButtonElement>('.resultado app-boton-pdf button')!;
+    expect(boton.textContent).toContain('Descargar PDF');
+    expect(boton.getAttribute('aria-disabled')).not.toBe('true');
+    expect(elemento.querySelector('.resultado app-boton-pdf .nota:not([role])')).toBeNull();
+  });
+
+  it('con errores el botón del PDF se queda a la vista, deshabilitado y con el motivo', async () => {
+    const { elemento, refrescar, peticion, elegir } = pintar();
+    elegir(new File([XML], 'factura.xml'));
+    (await peticion('/api/validaciones')).flush(REPORTE_CON_ERRORES);
+    await refrescar();
+
+    const boton = elemento.querySelector<HTMLButtonElement>('.resultado app-boton-pdf button')!;
+    expect(boton.getAttribute('aria-disabled')).toBe('true');
+    expect(elemento.querySelector('.resultado app-boton-pdf .nota:not([role])')!.textContent).toBe('El PDF se habilita cuando el XML no tiene errores.');
+  });
 });

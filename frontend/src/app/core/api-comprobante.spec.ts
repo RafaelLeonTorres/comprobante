@@ -80,3 +80,121 @@ describe('ApiComprobante', () => {
     expect(await promesa).toBe('<cfdi:Comprobante/>');
   });
 });
+
+describe('ApiComprobante.pdf', () => {
+  function preparar() {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    return { api: TestBed.inject(ApiComprobante), http: TestBed.inject(HttpTestingController) };
+  }
+
+  const XML = '<?xml version="1.0"?><cfdi:Comprobante Nombre="Ñandú"/>';
+  const CONTENIDO_DEL_PDF = '%PDF-1.7 prueba';
+
+  function pdf(): Blob {
+    return new Blob([CONTENIDO_DEL_PDF], { type: 'application/pdf' });
+  }
+
+  it('manda el XML, el logo y la opción en un formulario y pide la respuesta como Blob', async () => {
+    const { api, http } = preparar();
+    const logo = new File([new Uint8Array([137, 80, 78, 71])], 'mi-logo.png', { type: 'image/png' });
+
+    const promesa = api.pdf(XML, { logo, incluirCadenaYSellos: false });
+    const peticion = http.expectOne('/api/representaciones/pdf');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.responseType).toBe('blob');
+    const formulario = peticion.request.body as FormData;
+    expect(formulario).toBeInstanceOf(FormData);
+    const xml = formulario.get('xml') as File;
+    expect(xml.name).toBe('comprobante.xml');
+    expect(xml.type).toBe('application/xml');
+    expect(await xml.text()).toBe(XML);
+    expect((formulario.get('logo') as File).name).toBe('mi-logo.png');
+    expect(formulario.get('incluirCadenaYSellos')).toBe('false');
+    peticion.flush(pdf());
+
+    await promesa;
+  });
+
+  it('sin logo, o con un logo nulo, no manda el campo del logo', async () => {
+    const { api, http } = preparar();
+
+    const promesa = api.pdf(XML, { incluirCadenaYSellos: true });
+    const peticion = http.expectOne('/api/representaciones/pdf');
+    const formulario = peticion.request.body as FormData;
+    expect(formulario.has('logo')).toBe(false);
+    expect(formulario.get('incluirCadenaYSellos')).toBe('true');
+    peticion.flush(pdf());
+    await promesa;
+
+    const conNulo = api.pdf(XML, { logo: null, incluirCadenaYSellos: true });
+    const otra = http.expectOne('/api/representaciones/pdf');
+    expect((otra.request.body as FormData).has('logo')).toBe(false);
+    otra.flush(pdf());
+    await conNulo;
+  });
+
+  it('devuelve el PDF con el nombre que propone la API', async () => {
+    const { api, http } = preparar();
+
+    const promesa = api.pdf(XML, { incluirCadenaYSellos: true });
+    http
+      .expectOne('/api/representaciones/pdf')
+      .flush(pdf(), { headers: { 'Content-Disposition': 'attachment; filename="EKU9003173C9-A-123-prueba.pdf"' } });
+
+    const resultado = await promesa;
+    expect(resultado.nombre).toBe('EKU9003173C9-A-123-prueba.pdf');
+    expect(resultado.archivo.type).toBe('application/pdf');
+    expect(await resultado.archivo.text()).toBe(CONTENIDO_DEL_PDF);
+  });
+
+  it('si la API no propone nombre, usa uno por omisión', async () => {
+    const { api, http } = preparar();
+
+    const promesa = api.pdf(XML, { incluirCadenaYSellos: true });
+    http.expectOne('/api/representaciones/pdf').flush(pdf());
+
+    expect((await promesa).nombre).toBe('comprobante.pdf');
+  });
+
+  it('un 400 llega con el cuerpo leído: cada error en su campo', async () => {
+    const { api, http } = preparar();
+
+    const promesa = api.pdf(XML, { incluirCadenaYSellos: true });
+    http.expectOne('/api/representaciones/pdf').flush(
+      new Blob([JSON.stringify({ title: 'Hay datos que corregir', errors: { logo: ['El logo pesa más de 200 KB; sube uno más ligero.'] } })], {
+        type: 'application/problem+json',
+      }),
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    const error = (await promesa.catch((e: unknown) => e)) as ErrorApi;
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect(error.estado).toBe(400);
+    expect(error.campos['logo']).toEqual(['El logo pesa más de 200 KB; sube uno más ligero.']);
+  });
+
+  it('un 429 trae el motivo de la API', async () => {
+    const { api, http } = preparar();
+
+    const promesa = api.pdf(XML, { incluirCadenaYSellos: true });
+    http.expectOne('/api/representaciones/pdf').flush(
+      new Blob([JSON.stringify({ title: 'Demasiadas solicitudes', detail: 'Se están dibujando otros PDF; espera unos segundos.' })]),
+      { status: 429, statusText: 'Too Many Requests' },
+    );
+
+    const error = (await promesa.catch((e: unknown) => e)) as ErrorApi;
+    expect(error.estado).toBe(429);
+    expect(error.detalle).toBe('Se están dibujando otros PDF; espera unos segundos.');
+  });
+
+  it('sin conexión explica cómo revisar los contenedores', async () => {
+    const { api, http } = preparar();
+
+    const promesa = api.pdf(XML, { incluirCadenaYSellos: true });
+    http.expectOne('/api/representaciones/pdf').error(new ProgressEvent('error'), { status: 0, statusText: '' });
+
+    const error = (await promesa.catch((e: unknown) => e)) as ErrorApi;
+    expect(error.estado).toBe(0);
+    expect(error.titulo).toBe('No se pudo conectar con la API');
+  });
+});

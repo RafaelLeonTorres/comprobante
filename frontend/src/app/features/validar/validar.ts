@@ -6,6 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatProgressBar } from '@angular/material/progress-bar';
 
+import { BotonPdf } from '../../compartido/boton-pdf';
 import { OPCIONES_DE_CAMPO } from '../../compartido/opciones-de-campo';
 import { RevisionXml } from '../../compartido/revision-xml';
 import { ApiComprobante } from '../../core/api-comprobante';
@@ -35,7 +36,7 @@ async function leerTexto(archivo: File): Promise<string> {
 
 @Component({
   selector: 'app-validar',
-  imports: [CoberturaReglas, FormField, FormRoot, MatButton, MatError, MatFormField, MatIcon, MatInput, MatLabel, MatProgressBar, RevisionXml],
+  imports: [BotonPdf, CoberturaReglas, FormField, FormRoot, MatButton, MatError, MatFormField, MatIcon, MatInput, MatLabel, MatProgressBar, RevisionXml],
   providers: [OPCIONES_DE_CAMPO],
   template: `
     <h1>Validar un XML de CFDI 4.0</h1>
@@ -113,7 +114,13 @@ async function leerTexto(archivo: File): Promise<string> {
     @if (revision(); as actual) {
       <section class="resultado" aria-labelledby="resultado-titulo">
         <h2 id="resultado-titulo" #titulo tabindex="-1">Resultado: {{ actual.nombre }}</h2>
-        <app-revision-xml [xml]="actual.xml" [reporte]="actual.reporte" />
+        <app-revision-xml [xml]="actual.xml" [reporte]="actual.reporte">
+          <app-boton-pdf
+            [xml]="actual.xml"
+            [habilitado]="actual.reporte.esValido"
+            motivo="El PDF se habilita cuando el XML no tiene errores."
+          />
+        </app-revision-xml>
       </section>
     }
 

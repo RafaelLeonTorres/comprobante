@@ -1,6 +1,6 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
-import { ErrorApi, aErrorApi } from './errores-api';
+import { ErrorApi, aErrorApi, conCuerpoLegible } from './errores-api';
 
 function respuesta(estado: number, cuerpo: unknown): HttpErrorResponse {
   return new HttpErrorResponse({ status: estado, statusText: 'x', error: cuerpo });
@@ -98,5 +98,59 @@ describe('aErrorApi', () => {
   it('cualquier otra cosa se vuelve un error genérico con su mensaje', () => {
     expect(aErrorApi(new Error('se rompió')).detalle).toBe('se rompió');
     expect(aErrorApi('texto').titulo).toBe('Algo salió mal');
+  });
+});
+
+describe('conCuerpoLegible', () => {
+  function respuestaEnBlob(estado: number, texto: string): HttpErrorResponse {
+    return new HttpErrorResponse({
+      status: estado,
+      statusText: 'x',
+      url: '/api/representaciones/pdf',
+      error: new Blob([texto], { type: 'application/problem+json' }),
+    });
+  }
+
+  it('un error con el cuerpo en Blob se vuelve a leer como JSON y se explica igual que los demás', async () => {
+    const problema = { title: 'Hay datos que corregir', errors: { logo: ['El logo debe ser una imagen PNG o JPEG.'] } };
+
+    const error = aErrorApi(await conCuerpoLegible(respuestaEnBlob(400, JSON.stringify(problema))));
+
+    expect(error.estado).toBe(400);
+    expect(error.titulo).toBe('Hay datos que corregir');
+    expect(error.campos['logo']).toEqual(['El logo debe ser una imagen PNG o JPEG.']);
+  });
+
+  it('conserva el estado, las cabeceras y la dirección del error original', async () => {
+    const original = new HttpErrorResponse({
+      status: 429,
+      statusText: 'Too Many Requests',
+      headers: new HttpHeaders({ 'Retry-After': '3' }),
+      url: '/api/representaciones/pdf',
+      error: new Blob(['{"detail":"Espera unos segundos."}']),
+    });
+
+    const legible = (await conCuerpoLegible(original)) as HttpErrorResponse;
+
+    expect(legible.status).toBe(429);
+    expect(legible.statusText).toBe('Too Many Requests');
+    expect(legible.headers.get('Retry-After')).toBe('3');
+    expect(legible.url).toBe('/api/representaciones/pdf');
+    expect(aErrorApi(legible).detalle).toBe('Espera unos segundos.');
+  });
+
+  it('un cuerpo que no es JSON (la página de error de un intermediario) se explica solo con el código', async () => {
+    const error = aErrorApi(await conCuerpoLegible(respuestaEnBlob(502, '<html>Bad Gateway</html>')));
+
+    expect(error.estado).toBe(502);
+    expect(error.titulo).toBe('La API tuvo un problema');
+  });
+
+  it('lo que no es un error con Blob se devuelve tal cual', async () => {
+    const sinBlob = respuesta(400, { title: 'x' });
+    const otro = new Error('no es de HTTP');
+
+    expect(await conCuerpoLegible(sinBlob)).toBe(sinBlob);
+    expect(await conCuerpoLegible(otro)).toBe(otro);
   });
 });

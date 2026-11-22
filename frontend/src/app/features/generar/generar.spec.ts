@@ -356,6 +356,65 @@ describe('Generar', () => {
     clic.mockRestore();
   });
 
+  it('con un XML sin hallazgos ofrece descargar el PDF', async () => {
+    const { elemento, ejemplo, enviar, peticion, refrescar } = pintar();
+    await ejemplo('Un servicio con IVA');
+    await enviar();
+    (await peticion('/api/comprobantes')).flush(GENERACION);
+    await refrescar();
+
+    const boton = elemento.querySelector<HTMLButtonElement>('.resultado app-boton-pdf button')!;
+    expect(boton.textContent).toContain('Descargar PDF');
+    expect(boton.getAttribute('aria-disabled')).not.toBe('true');
+    expect(elemento.querySelector('.resultado app-boton-pdf .nota:not([role])')).toBeNull();
+  });
+
+  it('con hallazgos el botón del PDF se queda a la vista, deshabilitado y con el motivo', async () => {
+    const { elemento, ejemplo, enviar, peticion, refrescar } = pintar();
+    await ejemplo('Un servicio con IVA');
+    await enviar();
+    const conErrores: ReporteValidacion = {
+      ...VALIDACION_LIMPIA,
+      esValido: false,
+      hallazgos: [{ codigo: 'CFDI40119', severidad: 'error', nodo: 'cfdi:Comprobante', atributo: 'Total', mensaje: 'El Total no corresponde.', linea: 2 }],
+    };
+    (await peticion('/api/comprobantes')).flush({ ...GENERACION, validacion: conErrores });
+    await refrescar();
+
+    const boton = elemento.querySelector<HTMLButtonElement>('.resultado app-boton-pdf button')!;
+    expect(boton.getAttribute('aria-disabled')).toBe('true');
+    expect(elemento.querySelector('.resultado app-boton-pdf .nota:not([role])')!.textContent).toBe('El PDF se habilita cuando el XML no tiene errores.');
+  });
+
+  it('el botón del PDF abre el diálogo y manda a la API el XML generado', async () => {
+    const { elemento, ejemplo, enviar, peticion, refrescar } = pintar();
+    const original = { crear: URL.createObjectURL, soltar: URL.revokeObjectURL };
+    URL.createObjectURL = vi.fn(() => 'blob:prueba');
+    URL.revokeObjectURL = vi.fn();
+    const clic = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    await ejemplo('Un servicio con IVA');
+    await enviar();
+    (await peticion('/api/comprobantes')).flush(GENERACION);
+    await refrescar();
+
+    elemento.querySelector<HTMLButtonElement>('.resultado app-boton-pdf button')!.click();
+    await refrescar();
+    const dialogo = document.querySelector('mat-dialog-container')!;
+    expect(dialogo.querySelector('h2')!.textContent).toContain('Descargar PDF');
+    [...dialogo.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent!.includes('Descargar PDF'))!.click();
+    const llamada = await peticion('/api/representaciones/pdf');
+
+    const formulario = llamada.request.body as FormData;
+    expect(await (formulario.get('xml') as File).text()).toBe(XML);
+    expect(formulario.get('incluirCadenaYSellos')).toBe('true');
+    llamada.flush(new Blob(['%PDF-1.7'], { type: 'application/pdf' }), { headers: { 'Content-Disposition': 'attachment; filename="EKU9003173C9-A-123-prueba.pdf"' } });
+    await refrescar();
+
+    clic.mockRestore();
+    URL.createObjectURL = original.crear;
+    URL.revokeObjectURL = original.soltar;
+  });
+
   it('un 400 de la API pone cada error en su campo y los que no tienen campo, en el aviso', async () => {
     const { elemento, ejemplo, enviar, peticion, refrescar, campo } = pintar();
     await ejemplo('Un servicio con IVA');

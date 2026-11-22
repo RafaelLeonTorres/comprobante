@@ -12,6 +12,7 @@ import { MatInput } from '@angular/material/input';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatSelect } from '@angular/material/select';
 
+import { BotonPdf } from '../../compartido/boton-pdf';
 import { CampoCatalogo } from '../../compartido/campo-catalogo';
 import { OPCIONES_DE_CAMPO } from '../../compartido/opciones-de-campo';
 import { RevisionXml } from '../../compartido/revision-xml';
@@ -36,6 +37,7 @@ interface ProblemaDeCampo {
 @Component({
   selector: 'app-generar',
   imports: [
+    BotonPdf,
     CampoCatalogo,
     DatePipe,
     FormField,
@@ -337,6 +339,11 @@ interface ProblemaDeCampo {
             <mat-icon svgIcon="descargar" aria-hidden="true" />
             Descargar XML
           </button>
+          <app-boton-pdf
+            [xml]="generado.xml"
+            [habilitado]="generado.validacion.esValido"
+            motivo="El PDF se habilita cuando el XML no tiene errores."
+          />
         </app-revision-xml>
       </section>
     }
