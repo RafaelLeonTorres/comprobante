@@ -30,8 +30,12 @@
               }
             ],
             "styles": [
-              "@fontsource/roboto/latin-400.css",
-              "@fontsource/roboto/latin-500.css",
+              "@fontsource/atkinson-hyperlegible-next/latin-400.css",
+              "@fontsource/atkinson-hyperlegible-next/latin-600.css",
+              "@fontsource/atkinson-hyperlegible-next/latin-700.css",
+              "@fontsource/atkinson-hyperlegible-next/latin-800.css",
+              "@fontsource/atkinson-hyperlegible-mono/latin-400.css",
+              "@fontsource/atkinson-hyperlegible-mono/latin-600.css",
               "src/styles.scss"
             ]
           },
@@ -49,7 +53,15 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              }
             },
             "development": {
               "optimization": false,

@@ -31,9 +31,32 @@ const ICONOS: Readonly<Record<string, string>> = {
   codigo: 'M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z',
 };
 
+/**
+ * Iconos de trazo del sitio (el sol y la luna del botón de tema): llevan sus propios atributos en lugar del relleno de
+ * los de arriba.
+ */
+const ICONOS_DE_TRAZO: Readonly<Record<string, string>> = {
+  sol: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></g>',
+  luna: '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M20.5 14.3A8.5 8.5 0 0 1 9.7 3.5a8.5 8.5 0 1 0 10.8 10.8Z"/>',
+};
+
 export function registrarIconos(registro: MatIconRegistry, sanitizador: DomSanitizer): void {
   for (const [nombre, trazo] of Object.entries(ICONOS)) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="${trazo}"/></svg>`;
-    registro.addSvgIconLiteral(nombre, sanitizador.bypassSecurityTrustHtml(svg));
+    registrar(registro, sanitizador, nombre, `<path d="${trazo}"/>`, 'fill="currentColor"');
   }
+
+  for (const [nombre, dibujo] of Object.entries(ICONOS_DE_TRAZO)) {
+    registrar(registro, sanitizador, nombre, dibujo, '');
+  }
+}
+
+function registrar(
+  registro: MatIconRegistry,
+  sanitizador: DomSanitizer,
+  nombre: string,
+  dibujo: string,
+  atributos: string,
+): void {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${atributos}>${dibujo}</svg>`;
+  registro.addSvgIconLiteral(nombre, sanitizador.bypassSecurityTrustHtml(svg));
 }

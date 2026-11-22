@@ -6,6 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatProgressBar } from '@angular/material/progress-bar';
 
+import { OPCIONES_DE_CAMPO } from '../../compartido/opciones-de-campo';
 import { RevisionXml } from '../../compartido/revision-xml';
 import { ApiComprobante } from '../../core/api-comprobante';
 import { ErrorApi, aErrorApi } from '../../core/errores-api';
@@ -35,6 +36,7 @@ async function leerTexto(archivo: File): Promise<string> {
 @Component({
   selector: 'app-validar',
   imports: [CoberturaReglas, FormField, FormRoot, MatButton, MatError, MatFormField, MatIcon, MatInput, MatLabel, MatProgressBar, RevisionXml],
+  providers: [OPCIONES_DE_CAMPO],
   template: `
     <h1>Validar un XML de CFDI 4.0</h1>
     <p class="intro">

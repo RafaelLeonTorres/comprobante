@@ -29,11 +29,31 @@ describe('Inicio', () => {
     return { elemento: fixture.nativeElement as HTMLElement, http, refrescar };
   }
 
-  it('explica que no timbra', () => {
+  it('presenta la app y explica que no timbra', () => {
     const { elemento } = pintar();
 
-    expect(elemento.querySelector('h1')!.textContent).toContain('CFDI 4.0');
+    expect(elemento.querySelector('h1')!.textContent).toBe('Comprobante');
+    expect(elemento.querySelector('.rol')!.textContent).toContain('CFDI 4.0');
     expect(elemento.querySelector('[role="note"]')!.textContent).toContain('Sin validez fiscal');
+  });
+
+  it('abre con dos botones, uno para generar y otro para validar', () => {
+    const { elemento } = pintar();
+
+    const botones = [...elemento.querySelectorAll<HTMLAnchorElement>('.acciones a')];
+    expect(botones.map((a) => a.getAttribute('href'))).toEqual(['/generar', '/validar']);
+    expect(botones.map((a) => a.textContent!.trim())).toEqual(['Generar un CFDI', 'Validar un XML']);
+  });
+
+  it('muestra un ejemplo de CFDI resaltado que es solo decoración y no lo leen los lectores de pantalla', () => {
+    const { elemento } = pintar();
+
+    const ejemplo = elemento.querySelector('.registro')!;
+    expect(ejemplo.getAttribute('aria-hidden')).toBe('true');
+    expect(ejemplo.textContent).toContain('<cfdi:Comprobante Version="4.0"');
+    expect(ejemplo.querySelectorAll('.etiqueta').length).toBeGreaterThan(0);
+    expect(ejemplo.querySelectorAll('.atributo').length).toBeGreaterThan(0);
+    expect(ejemplo.querySelectorAll('.valor').length).toBeGreaterThan(0);
   });
 
   it('ofrece los tres caminos: generar, validar y consultar los catálogos', () => {

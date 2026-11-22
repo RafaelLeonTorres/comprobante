@@ -1,21 +1,54 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
+import { MatAnchor } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
+import { resaltarXml } from '../../compartido/resaltado-xml';
 import { EstadoApi } from '../../core/estado-api';
+
+/**
+ * El elemento llamativo del inicio, como el registro en C# del sitio: el arranque de un CFDI 4.0, abreviado. Es solo una
+ * ilustración (le faltan atributos y nodos obligatorios) y por eso va oculta a los lectores de pantalla.
+ */
+const EJEMPLO_XML = `<cfdi:Comprobante Version="4.0"
+    Serie="A" Folio="1001"
+    Fecha="2026-11-22T10:30:00"
+    TipoDeComprobante="I"
+    Moneda="MXN" Total="1160.00">
+  <cfdi:Emisor Rfc="EKU9003173C9"
+      RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XAXX010101000"
+      UsoCFDI="S01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto Cantidad="1"
+        Importe="1000.00"/>
+  </cfdi:Conceptos>
+  <!-- abreviado -->
+</cfdi:Comprobante>`;
 
 @Component({
   selector: 'app-inicio',
-  imports: [DatePipe, DecimalPipe, MatIcon, RouterLink],
+  imports: [DatePipe, DecimalPipe, MatAnchor, MatIcon, RouterLink],
   template: `
     <section class="portada">
-      <h1>Generador y validador de XML CFDI 4.0</h1>
-      <p class="resumen">
-        Arma, sella y revisa comprobantes fiscales sin timbrarlos. Calcula importes e impuestos con los
-        redondeos del Anexo 20, genera el XML con un certificado de prueba del SAT y revisa cualquier
-        XML contra los esquemas y las reglas de validación, con el código de cada error.
-      </p>
+      <div class="presentacion">
+        <h1>Comprobante</h1>
+        <p class="rol">Generador y validador de XML CFDI 4.0</p>
+        <p class="resumen">
+          Arma, sella y revisa comprobantes fiscales sin timbrarlos. Calcula importes e impuestos con los
+          redondeos del Anexo 20, genera el XML con un certificado de prueba del SAT y revisa cualquier
+          XML contra los esquemas y las reglas de validación, con el código de cada error.
+        </p>
+        <div class="acciones">
+          <a matButton="filled" routerLink="/generar">Generar un CFDI</a>
+          <a matButton="outlined" routerLink="/validar">Validar un XML</a>
+        </div>
+      </div>
+
+      <figure class="registro" aria-hidden="true">
+        <pre class="xml-resaltado"><code>@for (linea of ejemplo; track $index) {<span class="linea">@for (token of linea; track $index) {<span [class]="token.tipo">{{ token.texto }}</span>}</span>}</code></pre>
+      </figure>
     </section>
 
     <aside class="aviso" role="note">
@@ -101,14 +134,17 @@ import { EstadoApi } from '../../core/estado-api';
     :host {
       display: block;
       box-sizing: border-box;
-      max-width: 52rem;
+      max-width: 72rem;
       margin: 0 auto;
-      padding: 32px 24px 48px;
+      padding: clamp(2rem, 6vw, 4rem) clamp(1.25rem, 4vw, 2.5rem) 48px;
     }
 
     h1 {
-      margin: 0 0 12px;
-      font: var(--mat-sys-headline-medium);
+      margin: 0 0 0.3em;
+      font-size: clamp(2.75rem, 8vw, 4.5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
     }
 
     h2 {
@@ -116,17 +152,73 @@ import { EstadoApi } from '../../core/estado-api';
       font: var(--mat-sys-title-large);
     }
 
+    .portada {
+      display: grid;
+      gap: 2.5rem 3.5rem;
+      align-items: center;
+      margin: 0 0 40px;
+
+      @media (min-width: 60rem) {
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      }
+    }
+
+    .rol {
+      margin: 0 0 12px;
+      font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+      font-weight: 700;
+    }
+
     .resumen {
+      max-width: 36rem;
       margin: 0 0 24px;
-      font: var(--mat-sys-body-large);
       color: var(--mat-sys-on-surface-variant);
+    }
+
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      a {
+        --mat-button-filled-container-height: 48px;
+        --mat-button-outlined-container-height: 48px;
+      }
+    }
+
+    /* El elemento llamativo: una tarjeta con borde de tinta y sombra sólida morada, como el registro del sitio. */
+    .registro {
+      min-width: 0;
+      margin: 0 12px 12px 0;
+    }
+
+    .registro pre {
+      margin: 0;
+      padding: clamp(0.9rem, 3vw, 2rem);
+      overflow: hidden;
+      background-color: var(--sitio-surface);
+      border: 2px solid var(--sitio-ink);
+      border-radius: var(--mat-sys-corner-large);
+      box-shadow: 12px 12px 0 var(--sitio-accent);
+      color: var(--sitio-ink);
+      font-size: clamp(0.6rem, 2.7vw, 0.98rem);
+      line-height: 1.8;
+    }
+
+    .registro code {
+      font-family: inherit;
+    }
+
+    .linea {
+      display: block;
+      white-space: pre;
     }
 
     .aviso {
       display: flex;
       gap: 12px;
       align-items: flex-start;
-      margin: 0 0 32px;
+      margin: 0 0 40px;
       padding: 16px;
       border-radius: var(--mat-sys-corner-medium);
       background-color: var(--mat-sys-tertiary-container);
@@ -138,12 +230,12 @@ import { EstadoApi } from '../../core/estado-api';
     }
 
     .caminos {
-      margin: 0 0 32px;
+      margin: 0 0 40px;
 
       ul {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-        gap: 12px;
+        gap: 16px;
         margin: 0;
         padding: 0;
         list-style: none;
@@ -158,12 +250,12 @@ import { EstadoApi } from '../../core/estado-api';
         padding: 16px;
         border: 1px solid var(--mat-sys-outline-variant);
         border-radius: var(--mat-sys-corner-medium);
-        background-color: var(--mat-sys-surface-container-lowest);
+        background-color: var(--sitio-surface);
         color: inherit;
         text-decoration: none;
 
         &:hover {
-          background-color: var(--mat-sys-surface-container-low);
+          border-color: var(--mat-sys-primary);
         }
       }
 
@@ -191,7 +283,7 @@ import { EstadoApi } from '../../core/estado-api';
     }
 
     .correcto mat-icon {
-      color: var(--mat-sys-primary);
+      color: var(--sitio-ok);
     }
 
     .error mat-icon {
@@ -202,6 +294,7 @@ import { EstadoApi } from '../../core/estado-api';
 export class Inicio {
   private readonly api = inject(EstadoApi);
 
+  protected readonly ejemplo = resaltarXml(EJEMPLO_XML);
   protected readonly salud = this.api.salud();
   protected readonly catalogos = this.api.catalogos();
 

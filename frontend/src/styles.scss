@@ -1,7 +1,18 @@
-// Tema de Angular Material 3. mat.theme() define las variables CSS (--mat-sys-*) que usan los componentes de
-// Material y los estilos propios. Con theme-type: color-scheme el tema sigue la preferencia del sistema (claro u
-// oscuro). Más en https://material.angular.dev/guide/theming
+// Tema de Angular Material 3 con la identidad de mi sitio (https://rafaelleontorres.github.io/mi-sitio2/, su
+// assets/css/main.css): morado .NET, Atkinson Hyperlegible, radios de 6, 10 y 18 px y un solo elemento llamativo.
+// Claro u oscuro según el sistema, o según el botón del encabezado, que fija data-tema en <html> (core/tema.ts).
+// mat.theme() define las variables CSS --mat-sys-* que usan los componentes de Material; abajo se les ponen los colores
+// del sitio. Más en https://material.angular.dev/guide/theming
+@use 'sass:string';
 @use '@angular/material' as mat;
+
+// unquote deja la lista de familias tal cual: con comillas sería el nombre de una sola familia.
+$sans: string.unquote(
+  '"Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+);
+$mono: string.unquote(
+  '"Atkinson Hyperlegible Mono", "Cascadia Code", "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace'
+);
 
 html {
   height: 100%;
@@ -10,15 +21,119 @@ html {
     (
       color: (
         theme-type: color-scheme,
-        primary: mat.$azure-palette,
+        primary: mat.$violet-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: $sans,
+        brand-family: $sans,
+        bold-weight: 800,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
       density: 0,
     )
   );
 
   // Anillo de foco visible al navegar con teclado. Sin esto Material solo cambia el tono del botón enfocado (su borde sale transparente).
   @include mat.strong-focus-indicators();
+
+  // Colores del sitio, cada uno como claro y oscuro (el sitio los llama paper, band, surface, ink, ink-2, line y accent).
+  --sitio-paper: light-dark(#fbfbfd, #14131f);
+  --sitio-band: light-dark(#f4f2fa, #191826);
+  --sitio-surface: light-dark(#ffffff, #1d1b2c);
+  --sitio-ink: light-dark(#1b1733, #ecebf6);
+  --sitio-ink-2: light-dark(#5d5875, #aaa6c3);
+  --sitio-line: light-dark(#e4e0ef, #2e2c44);
+  --sitio-accent: light-dark(#512bd4, #a794ff);
+  --sitio-accent-strong: light-dark(#3d1fae, #c2b5ff);
+  --sitio-accent-soft: light-dark(#ede7ff, #2a2450);
+  --sitio-accent-ink: light-dark(#ffffff, #14131f);
+  --sitio-ok: light-dark(#0f7b5f, #5fd3a9);
+  --sitio-code-bg: light-dark(#f6f4fc, #1a1929);
+  // Los colores del registro en C# del sitio, que aquí pintan el XML: etiqueta, atributo, valor, número y comentario.
+  --sitio-tok-k: light-dark(#512bd4, #b6a6ff);
+  --sitio-tok-t: light-dark(#0e6b84, #6fd0e8);
+  --sitio-tok-s: light-dark(#0f7b5f, #7fdcae);
+  --sitio-tok-n: light-dark(#a85400, #ffb46b);
+  --sitio-tok-c: light-dark(#6f6a88, #8e8aa8);
+
+  // Material con esos colores. El morado es el primario; el ámbar del sitio (el de los números) es el terciario, que la
+  // app usa para avisos y resultados parciales.
+  --mat-sys-primary: var(--sitio-accent);
+  --mat-sys-on-primary: var(--sitio-accent-ink);
+  --mat-sys-primary-container: var(--sitio-accent-soft);
+  --mat-sys-on-primary-container: var(--sitio-accent-strong);
+  --mat-sys-secondary: var(--sitio-ink-2);
+  --mat-sys-on-secondary: var(--sitio-paper);
+  --mat-sys-secondary-container: var(--sitio-accent-soft);
+  --mat-sys-on-secondary-container: var(--sitio-accent-strong);
+  --mat-sys-tertiary: var(--sitio-tok-n);
+  --mat-sys-on-tertiary: light-dark(#ffffff, #14131f);
+  --mat-sys-tertiary-container: light-dark(#fdeccf, #3a2a12);
+  --mat-sys-on-tertiary-container: light-dark(#5b3200, #ffd9a8);
+  --mat-sys-background: var(--sitio-paper);
+  --mat-sys-surface: var(--sitio-paper);
+  --mat-sys-on-background: var(--sitio-ink);
+  --mat-sys-on-surface: var(--sitio-ink);
+  --mat-sys-surface-variant: var(--sitio-band);
+  --mat-sys-on-surface-variant: var(--sitio-ink-2);
+  --mat-sys-surface-container-lowest: light-dark(#ffffff, #14131f);
+  --mat-sys-surface-container-low: light-dark(#f7f5fc, #191826);
+  --mat-sys-surface-container: light-dark(#f4f2fa, #1d1b2c);
+  --mat-sys-surface-container-high: light-dark(#ece8f6, #242238);
+  --mat-sys-surface-container-highest: light-dark(#e4dff2, #2b2943);
+  // El contorno de un campo debe verse (3:1 contra el fondo); la línea del sitio es solo un separador.
+  --mat-sys-outline: light-dark(#77718f, #8e8aa8);
+  --mat-sys-outline-variant: var(--sitio-line);
+
+  // Radios del sitio: 6, 10 y 18 px.
+  --mat-sys-corner-small: 6px;
+  --mat-sys-corner-medium: 10px;
+  --mat-sys-corner-large: 18px;
+
+  // Títulos con el peso y el interlineado cerrado de los del sitio.
+  --mat-sys-headline-large-weight: 800;
+  --mat-sys-headline-medium-weight: 800;
+  --mat-sys-headline-small-weight: 800;
+  --mat-sys-title-large-weight: 800;
+  --mat-sys-title-medium-weight: 700;
+  --mat-sys-headline-large-tracking: -0.03em;
+  --mat-sys-headline-medium-tracking: -0.03em;
+  --mat-sys-headline-small-tracking: -0.02em;
+  --mat-sys-title-large-tracking: -0.015em;
+  // mat.theme() deja cada tipografía compuesta (la que usan las pantallas con `font: var(--mat-sys-headline-medium)`) con los
+  // valores ya resueltos, así que no sigue a los pesos de arriba: se arma de nuevo con las variables sueltas.
+  --mat-sys-headline-large: var(--mat-sys-headline-large-weight) var(--mat-sys-headline-large-size) / var(--mat-sys-headline-large-line-height)
+    var(--mat-sys-headline-large-font);
+  --mat-sys-headline-medium: var(--mat-sys-headline-medium-weight) var(--mat-sys-headline-medium-size) / var(--mat-sys-headline-medium-line-height)
+    var(--mat-sys-headline-medium-font);
+  --mat-sys-headline-small: var(--mat-sys-headline-small-weight) var(--mat-sys-headline-small-size) / var(--mat-sys-headline-small-line-height)
+    var(--mat-sys-headline-small-font);
+  --mat-sys-title-large: var(--mat-sys-title-large-weight) var(--mat-sys-title-large-size) / var(--mat-sys-title-large-line-height)
+    var(--mat-sys-title-large-font);
+  --mat-sys-title-medium: var(--mat-sys-title-medium-weight) var(--mat-sys-title-medium-size) / var(--mat-sys-title-medium-line-height)
+    var(--mat-sys-title-medium-font);
+
+  // Botones como los del sitio: esquinas de 10 px, letra gruesa y el botón secundario con contorno de tinta.
+  --mat-button-filled-container-shape: 10px;
+  --mat-button-outlined-container-shape: 10px;
+  --mat-button-tonal-container-shape: 10px;
+  --mat-button-text-container-shape: 10px;
+  --mat-button-filled-label-text-weight: 800;
+  --mat-button-outlined-label-text-weight: 800;
+  --mat-button-tonal-label-text-weight: 800;
+  --mat-button-text-label-text-weight: 600;
+  --mat-button-outlined-outline-width: 2px;
+  --mat-button-outlined-outline-color: var(--sitio-ink);
+  --mat-button-outlined-label-text-color: var(--sitio-ink);
+}
+
+html[data-tema='claro'] {
+  color-scheme: light;
+}
+
+html[data-tema='oscuro'] {
+  color-scheme: dark;
 }
 
 body {
@@ -26,14 +141,64 @@ body {
   margin: 0;
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+  font: var(--mat-sys-body-large);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+// El interlineado cerrado y el espaciado entre letras de los títulos del sitio (el peso va en las variables de arriba).
+h1 {
+  letter-spacing: var(--mat-sys-headline-medium-tracking);
+}
+
+h2,
+h3 {
+  letter-spacing: var(--mat-sys-title-large-tracking);
+}
+
+// Los enlaces del texto, como los del sitio: morado y subrayado fino que se engruesa al apuntarlos.
+a:not([class]) {
+  color: var(--mat-sys-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 
 // El texto que el usuario debe copiar o leer tal cual (XML, cadena original, sello) va en monoespaciada.
 code,
 pre,
 .mono {
-  font-family: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+  font-family: $mono;
+}
+
+// El XML resaltado (el visor y el ejemplo del inicio) con los colores del registro del sitio.
+.xml-resaltado {
+  .etiqueta {
+    color: var(--sitio-tok-k);
+    font-weight: 600;
+  }
+
+  .atributo {
+    color: var(--sitio-tok-t);
+  }
+
+  .valor {
+    color: var(--sitio-tok-s);
+  }
+
+  .puntuacion {
+    color: var(--sitio-ink);
+  }
+
+  .comentario,
+  .declaracion {
+    color: var(--sitio-tok-c);
+    font-style: italic;
+  }
 }
 
 // Un aviso o un resultado recibe el foco por código y se lleva arriba de la ventana (core/foco.ts): que quede un respiro.
@@ -48,7 +213,7 @@ section[aria-labelledby] {
   padding: 16px 16px 8px;
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
-  background-color: var(--mat-sys-surface-container-lowest);
+  background-color: var(--sitio-surface);
 
   > h2 {
     margin: 0 0 12px;

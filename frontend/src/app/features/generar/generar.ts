@@ -13,6 +13,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatSelect } from '@angular/material/select';
 
 import { CampoCatalogo } from '../../compartido/campo-catalogo';
+import { OPCIONES_DE_CAMPO } from '../../compartido/opciones-de-campo';
 import { RevisionXml } from '../../compartido/revision-xml';
 import { ApiComprobante } from '../../core/api-comprobante';
 import { descargarTexto } from '../../core/descarga';
@@ -56,6 +57,7 @@ interface ProblemaDeCampo {
     TarjetaConcepto,
     TotalesCalculo,
   ],
+  providers: [OPCIONES_DE_CAMPO],
   template: `
     <h1>Generar un CFDI 4.0</h1>
     <p class="intro">
