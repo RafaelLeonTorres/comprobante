@@ -222,7 +222,7 @@ Un complemento que la app no trae en sus esquemas (Pagos, Nómina, Comercio Exte
 | `GET /api/catalogos` · `GET /api/catalogos/{nombre}?q=&pagina=&tamano=` | Versión y tamaño de los catálogos, y búsqueda paginada de claves |
 | `GET /api/openapi/v1.json` · `GET /api/scalar` | La descripción OpenAPI y la página para probar la API |
 
-- Errores con `ProblemDetails` en español: 400 con los errores por campo, 413 si el XML pasa del límite, 415 si no es XML y 429 si se excede el límite de solicitudes.
+- Errores con `ProblemDetails` en español: 400 con los errores por campo, 413 si el XML pasa del límite, 415 si no es XML y 429, con `Retry-After`, si se excede el límite de solicitudes.
 - La API se documenta con OpenAPI y se explora con Scalar, también en producción: no tiene nada privado. Todo vive bajo `/api`, así nginx lo pasa con una sola regla.
 
 ---
@@ -251,7 +251,7 @@ Prácticas, las mismas que en Mediateca:
 - **XML del usuario:** se lee con `DtdProcessing.Prohibit` y sin `XmlResolver`, contra XXE y bombas de entidades. El resolver local solo se usa para los archivos del SAT. El tamaño máximo se aplica en nginx y en la API.
 - **Nada se guarda:** ni el XML ni los formularios se guardan o se registran. Los registros solo llevan tamaño, duración y resultado.
 - **Solo CSD de prueba:** sus llaves y su contraseña son públicas, y la API nunca recibe llaves.
-- **Límite de solicitudes** por IP en generar y validar, con el middleware de rate limiting.
+- **Límite de solicitudes** por IP y por minuto, con cubetas separadas para generar, validar, calcular y consultar, y una global (`Limites` en la configuración): al pasarse, 429 con `Retry-After`.
 - **Cabeceras en nginx:** `Content-Security-Policy`, `X-Content-Type-Options` y `server_tokens off`.
 - **Sin cuentas ni sesiones:** no hay datos personales que proteger más allá de la solicitud en curso.
 
@@ -288,8 +288,14 @@ Prácticas, las mismas que en Mediateca:
     "SembrarAlIniciar": true       // aplica migraciones y carga los catálogos si cambiaron
   },
   "Limites": {
-    "XmlMaximoBytes": 2097152,     // 2 MB, también en nginx
-    "SolicitudesPorMinuto": 30
+    "JsonMaximoBytes": 1048576,    // 1 MiB: cálculo y generación (el XML a validar se limita a 2 MB, fijo, también en nginx)
+    "Solicitudes": {               // por IP y por minuto (fase 5)
+      "Generar": 20,
+      "Validar": 30,
+      "Calcular": 240,             // los totales en vivo mandan hasta 2,5 por segundo
+      "Consultar": 300,            // catálogos, emisores y reglas
+      "Global": 600                // todo lo demás, salvo /api/health
+    }
   }
 }
 ```
@@ -304,7 +310,7 @@ Prácticas, las mismas que en Mediateca:
 
 Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase 0 se trabaja con ramas y pull requests.
 
-**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 355 pruebas unitarias y 50 de integración en el backend y 201 con Vitest en el frontend. Lo siguiente: la fase 5 (seguridad y pulido).
+**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 355 pruebas unitarias y 50 de integración en el backend y 201 con Vitest en el frontend. Lo siguiente: la fase 5 (seguridad y pulido), que ya tiene su diseño en las notas «Para retomar» de la fase pero ningún código; después, la fase 6.
 
 ### Fase 0. Base del proyecto
 - [x] Confirmar las decisiones de la sección 14.
@@ -360,6 +366,17 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 - [ ] Límites de tamaño y de solicitudes, cabeceras de nginx y registros sin contenido.
 - [ ] Pruebas de integración de seguridad: XXE, 413, 415 y 429.
 - [ ] Revisión de accesibilidad y del modo oscuro. Adelantada en la fase 4 y verificada por código en el navegador: contraste AA de todo el texto en las cuatro pantallas, en claro y oscuro; anillo de foco visible en todos los controles de las cuatro pantallas; nombres accesibles, títulos sin saltos y regiones; enlace del pie con blanco de pulsación de 24 px. Falta probar con un lector de pantalla.
+
+**Para retomar la fase 5.** Está diseñada y no tiene código todavía; el árbol de trabajo quedó limpio (rama `main`, 5 commits adelante de `comprobante/main`: las fases 3 y 4 sin subir). Lo decidido:
+
+- **Qué ya existe:** el XML de hasta 2 MB con 413, 415 y prueba de XXE en `/api/validaciones` (`EndpointsValidaciones`); `server_tokens off` y `client_max_body_size 2m` en `frontend/nginx.conf`; `ASPNETCORE_FORWARDEDHEADERS_ENABLED` en `docker-compose.yml` (la API solo se publica en `127.0.0.1`, así que la IP real llega por el `X-Forwarded-For` de nginx, cuyo último valor es el que vio nginx). **No existe todavía:** rate limiting, tope del JSON, registros mínimos, CSP ni cabeceras de seguridad.
+- **Configuración:** el bloque `Limites` de la sección 12. El límite del XML no se configura: lo fijan el lector del Core (`LectorXmlSeguro`) y el endpoint. El cálculo en vivo de Generar manda hasta 2,5 solicitudes por segundo (espera de 400 ms), por eso su cubeta es la más holgada, y cargar un ejemplo hace unas 20 consultas de catálogo.
+- **API** (carpeta `Seguridad/` en `Comprobante.Api`; las opciones se leen con `IOptions` al atender la solicitud, porque `Program.cs` lee su configuración antes de que `WebApplicationFactory` la cambie): `AddRateLimiter` con ventana deslizante de un minuto y 6 segmentos, sin cola, una política por cubeta (`.RequireRateLimiting(...)` en cálculo, generación, validación, catálogos, emisores y reglas) y un `GlobalLimiter` que deja pasar `/api/health`. La clave es la IP (en IPv6, el prefijo /64). Al rechazar: 429 con `ProblemDetails` en español, `Retry-After` y un aviso en el registro sin la IP.
+- **Tope del cuerpo:** middleware propio para el JSON (cálculo y generación): 413 si `Content-Length` pasa del límite y flujo con tope para los cuerpos sin longitud (`TestServer` no aplica los límites de Kestrel, así que se prueba ahí). Kestrel: `MaxRequestBodySize` de 2 MiB como respaldo y `AddServerHeader = false`.
+- **Registros sin contenido:** `UseHttpLogging` con método, ruta sin la consulta, estado, duración y `Content-Length` (`/api/health` sin registrar); categoría `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware` en `Information` en `appsettings.json`. En nginx, un `access_log` sin IP, sin consulta y sin agente de usuario.
+- **Pruebas:** `ApiFactory` con límites altos y `ForwardedHeaders_Enabled=true` (para simular clientes con `X-Forwarded-For`); `SeguridadApiTests` con `WithWebHostBuilder` y límites bajos: 429 con `Retry-After`, IP distintas con cubetas independientes, `/api/health` sin límite, 413 del JSON con y sin longitud, 415, XXE y bomba de entidades sin filtrar contenido ni tardar. Una unitaria de la clave por IP (IPv4, IPv4 mapeada a IPv6 y /64). En el frontend, revisar qué muestran Generar y los totales con un 429 (debe decir cuánto esperar) y probarlo.
+- **nginx:** las cabeceras van en un archivo que se incluye en cada `location` (un `add_header` dentro de un `location` descarta los del `server`): `Content-Security-Policy` (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` y `Permissions-Policy` sin cámara, micrófono ni geolocalización. Antes, revisar el `index.html` compilado: si el `<link>` de estilos trae un `onload`, la CSP lo bloquea y la app quedaría sin estilos (habría que desactivar el CSS crítico en línea en `angular.json`). Además: `client_max_body_size` de 1m y de 2m solo en `/api/validaciones`, `limit_req` holgado como freno previo (20 r/s con ráfaga de 60 y `limit_req_status 429`) y los 413 y 429 de nginx como `application/problem+json` en español bajo `/api/`.
+- **Al terminar:** `dotnet test backend\Comprobante.slnx -c Release --nologo` (hoy 355 unitarias y 50 de integración, esta con Docker), `npx ng test --watch=false` en `frontend` (hoy 201), `docker compose up -d --build --wait`, y en el navegador las cuatro pantallas sin violaciones de la CSP en la consola, generar → validar y un 429 provocado. Después, la fase 6 (README con capturas, artículo en el sitio y demo).
 
 **Entregable:** las pruebas de seguridad pasan en la CI y la app se usa con teclado y lector de pantalla.
 
