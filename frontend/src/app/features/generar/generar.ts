@@ -452,7 +452,7 @@ interface ProblemaDeCampo {
 
     .datos {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
       gap: 8px 16px;
       margin: 0 0 16px;
 
@@ -463,6 +463,7 @@ interface ProblemaDeCampo {
 
       dd {
         margin: 0;
+        overflow-wrap: anywhere;
       }
     }
 
