@@ -343,6 +343,31 @@ public class RepresentacionesApiTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Un_comprobante_que_el_motor_no_puede_acomodar_responde_422_y_no_un_error_del_servidor()
+    {
+        // Con cifras de 32 dígitos ya no hay letra que alcance en las columnas de importes: el XML está bien formado y es un
+        // CFDI 4.0, así que no es un 400, pero el PDF no cabe en las hojas.
+        var cifras = new HashSet<string>
+        {
+            "SubTotal", "Descuento", "Total", "TipoCambio", "Cantidad", "ValorUnitario", "Importe", "Base", "TasaOCuota",
+            "TotalImpuestosTrasladados", "TotalImpuestosRetenidos",
+        };
+        var documento = XDocument.Parse(await GenerarXmlAsync());
+        foreach (var atributo in documento.Descendants().Attributes().Where(a => cifras.Contains(a.Name.LocalName)).ToList())
+        {
+            atributo.Value = new string('9', 32);
+        }
+
+        using var formulario = Formulario(documento.ToString(SaveOptions.DisableFormatting));
+
+        using var respuesta = await _http.PostAsync(Ruta, formulario);
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, respuesta.StatusCode);
+        var problema = await respuesta.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("No se pudo generar el PDF", problema.GetProperty("title").GetString());
+    }
+
+    [Fact]
     public async Task La_documentacion_describe_el_formulario_y_las_respuestas()
     {
         var documento = await _http.GetFromJsonAsync<JsonElement>("/api/openapi/v1.json");
