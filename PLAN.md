@@ -24,7 +24,7 @@ Dónde vive cada cosa:
 - **Validar** cualquier XML CFDI 4.0: esquemas XSD del SAT, reglas de la matriz de errores (catálogos, cálculos y relaciones entre campos) y el sello contra su certificado. Cada falla trae su código del SAT (por ejemplo, `CFDI40161`), el nodo y un mensaje en español.
 - **Catálogos del SAT** con la fecha de su versión, para las validaciones y para buscar claves: productos y servicios, unidades, códigos postales, usos de CFDI, regímenes, formas de pago, monedas, tasas o cuotas…
 - **Ver** el XML formateado, la cadena original, el sello y los datos del certificado, y descargar el XML.
-- **Descargar la representación impresa en PDF** (fase 6): una plantilla propia en hoja carta, con logo, emisor y receptor, conceptos, totales con letra, resumen de impuestos, sellos y, si el XML ya trae el timbre, el código QR de verificación del SAT. Un CFDI sin timbrar sale con la marca de agua «Sin validez fiscal».
+- **Descargar la representación impresa en PDF** (fase 6, hecha): una plantilla propia en hoja carta, con logo, emisor y receptor, conceptos, totales con letra, resumen de impuestos, sellos y, si el XML ya trae el timbre, el código QR de verificación del SAT. Un CFDI sin timbrar sale con la marca de agua «Sin validez fiscal».
 
 ### No incluye (extensiones posibles)
 
@@ -44,7 +44,7 @@ Dónde vive cada cosa:
 | API | ASP.NET Core 11 con minimal APIs, OpenAPI y Scalar en desarrollo |
 | Catálogos | PostgreSQL 18 con Entity Framework Core 11 (Npgsql): tablas, migraciones y búsqueda con índices `pg_trgm`. Los CSV versionados en el repositorio son la fuente y se cargan a la base al arrancar. Importador del Excel del SAT con ExcelDataReader |
 | Frontend | Angular 22 (última 22.x), Angular Material, zoneless, Signal Forms y Vitest |
-| PDF (fase 6) | QuestPDF (licencia Community) en un proyecto aparte, `Comprobante.Pdf`, y QRCoder (MIT) para el código QR. Solo en pruebas: PdfPig y ZXing.Net, para leer el texto y el QR del PDF generado. La biblioteca se confirma con una prueba en la imagen de Docker al empezar la fase |
+| PDF | QuestPDF 2026.9 (licencia Community 3.0) en un proyecto aparte, `Comprobante.Pdf`, con las fuentes Atkinson Hyperlegible (OFL) incrustadas, y QRCoder (MIT) para el código QR. Solo en pruebas: PdfPig y ZXing.Net, para leer el texto y el QR del PDF generado. Confirmado dentro de la imagen de Docker de la API: dibuja sin instalar ningún paquete nativo más |
 | Pruebas | xUnit, WebApplicationFactory con Testcontainers (un PostgreSQL real y desechable) y archivos de referencia (XML y cadenas originales esperadas); Vitest en Angular |
 | Infraestructura | Docker Compose con tres contenedores (nginx con Angular, la API y PostgreSQL) y GitHub Actions |
 
@@ -69,9 +69,9 @@ flowchart LR
     WEB["web: nginx con el build de Angular"]
     subgraph APIC["api: ASP.NET Core 11"]
       API[Endpoints]
-      CORE["Comprobante.Core: cálculo, XML, cadena original, sello y validador"]
+      CORE["Comprobante.Core: cálculo, XML, cadena original, sello, validador y registro de impresión"]
       CAT["Comprobante.Catalogos: EF Core"]
-      PDF["Comprobante.Pdf: representación impresa en PDF (fase 6)"]
+      PDF["Comprobante.Pdf: QuestPDF y QRCoder dibujan la representación impresa"]
     end
     DB[("db: PostgreSQL 18, catálogos del SAT")]
   end
@@ -96,6 +96,7 @@ Decisiones principales:
 - **Los archivos del SAT, versionados.** Los XSD (`cfdv40.xsd`, `catCFDI.xsd`, `tdCFDI.xsd`), el XSLT de la cadena original con sus `xsl:include`, los CSD de prueba y los catálogos viven en `sat/`, con la fecha en que se descargaron. Un `XmlResolver` propio traduce las direcciones `http://www.sat.gob.mx/sitio_internet/…` a esos archivos: nada se descarga en tiempo de ejecución y las pruebas son reproducibles.
 - **Reglas con su código del SAT.** El validador es una lista de reglas pequeñas. Cada una tiene el código de la matriz de errores, el nodo que revisa y su mensaje en español, y se prueba por separado.
 - **El generador pasa por el validador.** Todo lo que se genera se valida antes de entregarse; si aparece un hallazgo, la respuesta lo dice en lugar de presentar el XML como correcto.
+- **El PDF en dos pasos.** `ConstructorDeRepresentacion` (en el núcleo) arma `RepresentacionImpresa`, un registro con todo lo que se imprime ya formateado, y `Comprobante.Pdf` solo lo dibuja. Así QuestPDF y QRCoder quedan fuera del núcleo y cada paso se prueba por separado.
 - **Un solo origen**, como Mediateca: nginx sirve Angular y pasa `/api` a la API.
 
 Estructura de carpetas:
@@ -119,10 +120,10 @@ Comprobante/                            F:\Respaldo\Respaldo\Cursos\Comprobante 
 │   ├── Dockerfile
 │   ├── Comprobante.slnx
 │   ├── src/
-│   │   ├── Comprobante.Core/           solicitud, cálculo y redondeo, XML, cadena original, sello, validador y reglas
+│   │   ├── Comprobante.Core/           solicitud, cálculo y redondeo, XML, cadena original, sello, validador, reglas y el registro de impresión
 │   │   ├── Comprobante.Catalogos/      EF Core: modelo, migraciones, siembra y consultas
 │   │   ├── Comprobante.Herramientas/   importador del Excel del SAT (consola)
-│   │   ├── Comprobante.Pdf/            plantilla de la representación impresa en PDF (fase 6)
+│   │   ├── Comprobante.Pdf/            la plantilla del PDF con QuestPDF, el código QR, las fuentes y el logo
 │   │   └── Comprobante.Api/            endpoints, límites y OpenAPI
 │   └── tests/
 │       ├── Comprobante.UnitTests/      incluye Referencia/: XML sellados y cadenas originales hechos con Python, lxml y OpenSSL
@@ -226,11 +227,11 @@ Un complemento que la app no trae en sus esquemas (Pagos, Nómina, Comercio Exte
 | `POST /api/comprobantes` | Genera y sella con el emisor de prueba elegido: `{ xml, cadenaOriginal, sello, noCertificado, calculo, validacion }` |
 | `POST /api/validaciones` | Recibe el XML en el cuerpo (`application/xml` o `text/xml`, hasta 2 MB) y devuelve el reporte: `{ esValido, hallazgos, selloValido, cadenaOriginal, certificado }`. Un XML con errores es un 200 con sus hallazgos, no un error de la solicitud |
 | `GET /api/validaciones/reglas` | Las 129 reglas de la matriz de errores y lo que la app hace con cada una (`revisada`, `parcial` o `noRevisada`, con su motivo) |
-| `POST /api/representaciones/pdf` (fase 6) | Recibe en `multipart/form-data` el XML (`xml`, hasta 2 MB) y, si se quiere, un logo (`logo`, PNG o JPEG de hasta 200 KB) y opciones (`opciones`). Devuelve la representación impresa en `application/pdf`, con el nombre `{RFC}-{Serie}-{Folio}-prueba.pdf` (sin `-prueba` si el XML trae timbre) |
+| `POST /api/representaciones/pdf` | Recibe en `multipart/form-data` el XML (`xml`, hasta 1 MB) y, si se quiere, un logo (`logo`, PNG o JPEG de hasta 200 KB y 2000 × 2000 px) y `incluirCadenaYSellos` (por omisión, sí). Devuelve la representación impresa en `application/pdf` (con `Cache-Control: no-store`), con el nombre `{RFC}-{Serie}-{Folio}-prueba.pdf` (sin `-prueba` si el XML trae timbre). Dibuja lo que dice el XML sin revisar sus reglas: para eso está `POST /api/validaciones` |
 | `GET /api/catalogos` · `GET /api/catalogos/{nombre}?q=&pagina=&tamano=` | Versión y tamaño de los catálogos, y búsqueda paginada de claves |
 | `GET /api/openapi/v1.json` · `GET /api/scalar` | La descripción OpenAPI y la página para probar la API |
 
-- Errores con `ProblemDetails` en español: 400 con los errores por campo, 413 si el XML o el JSON pasan del límite, 415 si no es XML y 429, con `Retry-After`, si se excede el límite de solicitudes.
+- Errores con `ProblemDetails` en español: 400 con los errores por campo (en el PDF, `xml`, `logo` o `incluirCadenaYSellos`), 413 si el XML o el JSON pasan del límite (en el PDF, también el logo), 415 si no es XML (en el PDF, si no es un formulario `multipart/form-data`), 422 si el PDF no puede acomodar un comprobante (por ejemplo, con cifras de 32 dígitos) y 429, con `Retry-After`, si se excede el límite de solicitudes o si ya se están dibujando todos los PDF que se permiten a la vez.
 - La API se documenta con OpenAPI y se explora con Scalar, también en producción: no tiene nada privado. Todo vive bajo `/api`, así nginx lo pasa con una sola regla.
 
 ---
@@ -251,7 +252,7 @@ Prácticas, las mismas que en Mediateca:
 - `httpResource` leído siempre con `hasValue()` antes de `value()`.
 - **Ejemplos precargados:** ingreso con IVA y retenciones, venta a público en general, factura en dólares y egreso relacionado con un ingreso. Sirven para la demo y para las capturas.
 - El visor de XML resalta la sintaxis con un componente propio, sin librerías pesadas.
-- **Descargar PDF** (fase 6): un botón junto a «Descargar XML» en Generar y, en Validar, solo cuando el reporte no trae errores (un PDF bien presentado de un CFDI con errores engaña). Un cuadro de opciones deja subir el logo del emisor, con vista previa, e incluir la cadena original; el logo solo vive en memoria.
+- **Descargar PDF** (fase 6): un botón junto a «Descargar XML» en Generar y, en Validar, habilitado solo cuando el reporte no trae errores (un PDF bien presentado de un CFDI con errores engaña); apagado sigue siendo enfocable y dice por qué. Abre un cuadro con el logo del emisor (PNG o JPEG, con vista previa, su nombre y un botón para quitarlo: el tipo y el peso se revisan en el navegador y los demás errores, como un logo de 2500 × 100 px, los contesta la API y salen junto al logo) y la casilla «Incluir la cadena original y los sellos». Mientras se dibuja, el cuadro no se cierra y avisa; al terminar baja el archivo con el nombre que manda la API, devuelve el foco al botón y dice «Se descargó …». El logo y la casilla se recuerdan solo en memoria y solo después de una descarga que salió bien.
 
 ---
 
@@ -262,7 +263,7 @@ Prácticas, las mismas que en Mediateca:
 - **Solo CSD de prueba:** sus llaves y su contraseña son públicas, y la API nunca recibe llaves.
 - **Límite de solicitudes** por IP y por minuto, con cubetas separadas para generar, validar, calcular y consultar, y una global (`Limites` en la configuración): al pasarse, 429 con `Retry-After`.
 - **Cabeceras en nginx:** `Content-Security-Policy` en la app web, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy` en todo, `server_tokens off` y sin la cabecera `Server` de Kestrel.
-- **PDF y logo (fase 6):** el PDF se dibuja solo con texto y números del XML leído con la lectura segura, sin HTML de por medio. El logo es opcional y solo PNG o JPEG (nada de SVG), con el tipo comprobado por los primeros bytes y 200 KB y 2000 × 2000 px como máximo, leídos del encabezado antes de decodificar (contra las bombas de descompresión); no se guarda.
+- **PDF y logo (fase 6):** el PDF se dibuja solo con texto y números del XML leído con la lectura segura, sin HTML ni navegador de por medio, y se responde con `Cache-Control: no-store`. El XML pesa a lo más 1 MB (un CFDI normal ocupa unos cuantos KB y cada concepto de más son renglones y hojas de más). El logo es opcional y solo PNG o JPEG (nada de SVG), con el tipo comprobado por los primeros bytes y 200 KB y 2000 × 2000 px como máximo, leídos del encabezado antes de decodificar (contra las bombas de descompresión); no se guarda. Dibujar gasta procesador y memoria: hay una cubeta por IP (`Pdf`, 10 por minuto) y a lo más 4 PDF a la vez en toda la API (`PdfSimultaneos`); con todos los lugares ocupados la solicitud no espera en fila, recibe 429 con `Retry-After` y el cliente reintenta.
 - **Sin cuentas ni sesiones:** no hay datos personales que proteger más allá de la solicitud en curso.
 
 ---
@@ -282,7 +283,7 @@ Prácticas, las mismas que en Mediateca:
   - 413, 415, 429 y un XML con XXE rechazado;
   - los catálogos cargan en un PostgreSQL desechable (Testcontainers, necesita Docker) y la búsqueda responde.
 - **Frontend (Vitest):** formulario de conceptos y totales, validador (archivo → reporte) y los servicios de la API.
-- **PDF (fase 6):** el importe con letra con muchos casos; el armado de la representación con los cinco XML de referencia y uno con un timbre inventado; el PDF generado (su texto, leído con PdfPig, y su QR, leído con ZXing.Net, que devuelve la dirección del SAT con sus cinco parámetros); la API (200, nombre del archivo, 400, 413, 415, logo falso o enorme y 429) y, en Vitest, el botón y el cuadro de opciones.
+- **PDF (fase 6):** el importe con letra con muchos casos; el armado de la representación con los cinco XML de referencia y uno con un timbre inventado; el PDF generado (su texto, leído con PdfPig, y su QR, leído con ZXing.Net, que devuelve la dirección del SAT con sus cinco parámetros); comprobantes extremos (1,500 conceptos, 3,000 CFDI relacionados, 500 impuestos en el resumen, un concepto con 300 impuestos, textos de mil caracteres sin espacios, cifras gigantes, caracteres que la fuente no tiene y un comprobante sin conceptos); valores que no son números en todos los importes y un comprobante al que se le quita, de a uno, cada atributo y cada nodo (unas 120 variantes, con y sin timbre), para que un XML raro no tumbe la solicitud; el validador del logo; la API (200, el nombre del archivo, 400, 413, 415, 422, un logo falso o enorme, la cubeta propia y el tope de PDF simultáneos con 429) y, en Vitest, el servicio, el botón y el cuadro de opciones.
 - **CI (GitHub Actions):** compilar y probar el backend, probar y compilar Angular, y una prueba de humo que levanta los tres contenedores, consulta `/api/health` a través de nginx y comprueba sus cabeceras, el 413 y el 429.
 
 ---
@@ -299,10 +300,12 @@ Prácticas, las mismas que en Mediateca:
     "SembrarAlIniciar": true       // aplica migraciones y carga los catálogos si cambiaron
   },
   "Limites": {
-    "JsonMaximoBytes": 1048576,    // 1 MiB: cálculo y generación (el XML a validar se limita a 2 MB, fijo, también en nginx)
+    "JsonMaximoBytes": 1048576,    // 1 MiB: cálculo y generación (el XML a validar se limita a 2 MB, fijo, también en nginx; el del PDF, a 1 MB)
+    "PdfSimultaneos": 4,           // PDF que se dibujan a la vez en toda la API (fase 6); con todos los lugares ocupados, 429
     "Solicitudes": {               // por IP y por minuto (fase 5)
       "Generar": 20,
       "Validar": 30,
+      "Pdf": 10,                   // dibujar un PDF cuesta más que validar (fase 6)
       "Calcular": 240,             // los totales en vivo mandan hasta 2,5 por segundo
       "Consultar": 300,            // catálogos, emisores y reglas
       "Global": 600                // todo lo demás, salvo /api/health
@@ -321,7 +324,7 @@ Prácticas, las mismas que en Mediateca:
 
 Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase 0 se trabaja con ramas y pull requests.
 
-**Dónde vamos (22 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 355 pruebas unitarias y 67 de integración en el backend y 215 con Vitest en el frontend. La app tomó la identidad visual de mi sitio (morado, Atkinson Hyperlegible, tema claro u oscuro) y la fase 5 (seguridad y pulido) está hecha, salvo la prueba con un lector de pantalla: límites de solicitudes y de tamaño en la API y en nginx, cabeceras de seguridad con CSP y registros sin contenido, verificados con Docker y en el navegador. El README ya está, con su banner, sus capturas (las toma un script, `docs/capturas/tomar-capturas.mjs`), el estado, la seguridad y las cifras revisadas contra la API y el arranque en frío (33.7 s en total, 13.8 s para cargar los 151,346 registros de catálogos); al tomar las capturas apareció y se corrigió un desborde del número de certificado del emisor en Generar. Lo siguiente: la fase 6 (representación impresa en PDF, pedida el 22 de noviembre, con su boceto ya hecho en `docs/plantilla-pdf/`) y la fase 7 (cierre para el portafolio).
+**Dónde vamos (22 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 571 pruebas unitarias y 94 de integración en el backend y 262 con Vitest en el frontend. La app tomó la identidad visual de mi sitio (morado, Atkinson Hyperlegible, tema claro u oscuro) y la fase 5 (seguridad y pulido) está hecha, salvo la prueba con un lector de pantalla: límites de solicitudes y de tamaño en la API y en nginx, cabeceras de seguridad con CSP y registros sin contenido, verificados con Docker y en el navegador. El README ya está, con su banner, sus capturas (las toma un script, `docs/capturas/tomar-capturas.mjs`), el estado, la seguridad y las cifras revisadas contra la API y el arranque en frío (33.7 s en total, 13.8 s para cargar los 151,346 registros de catálogos); al tomar las capturas apareció y se corrigió un desborde del número de certificado del emisor en Generar. Con la fase 6 se le agregó el PDF, sus capturas y la licencia de QuestPDF. La fase 6 (representación impresa en PDF, pedida el 22 de noviembre) quedó hecha: `POST /api/representaciones/pdf` dibuja el PDF con QuestPDF dentro de la imagen de Docker de la API, y Generar y Validar lo descargan desde un cuadro con logo opcional; igual que la interfaz, falta probarlo con un lector de pantalla. Lo siguiente: la fase 7 (cierre para el portafolio: artículo, proyecto en el sitio y demo).
 
 ### Fase 0. Base del proyecto
 - [x] Confirmar las decisiones de la sección 14.
@@ -378,7 +381,7 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 - [x] Pruebas de integración de seguridad: XXE, 413, 415 y 429. La CI, además, levanta Docker y comprueba las cabeceras, el 413 y el 429 de nginx.
 - [ ] Revisión de accesibilidad y del modo oscuro. Hecha en la fase 4 y repetida tras el cambio de estilo: contraste AA de todo el texto en las cuatro pantallas, en claro y oscuro (una auditoría calcula la razón de contraste de cada texto, también el del XML resaltado en las líneas con hallazgos); anillo de foco visible con el teclado; nombres accesibles, títulos sin saltos y regiones; celular de 375 px sin desbordes. Falta probar con un lector de pantalla, que tiene que hacer una persona.
 
-**Lo que quedó.** Todo verificado con `dotnet test` (355 unitarias y 67 de integración), `ng test` (215), Docker y el navegador.
+**Lo que quedó.** Todo verificado, al cerrar la fase, con `dotnet test` (355 unitarias y 67 de integración), `ng test` (215), Docker y el navegador.
 
 - **Configuración:** el bloque `Limites` de la sección 12. El límite del XML no se configura: lo fijan el lector del Core (`LectorXmlSeguro`) y el endpoint. El cálculo en vivo de Generar manda hasta 2,5 solicitudes por segundo (espera de 400 ms), por eso su cubeta es la más holgada, y cargar un ejemplo hace unas 20 consultas de catálogo.
 - **Límite de solicitudes** (`Comprobante.Api/Seguridad/LimiteDeSolicitudes`): ventana deslizante de un minuto con 6 segmentos y sin cola, una política por cubeta (`.RequireRateLimiting(...)` en cálculo, generación, validación y en las consultas de catálogos, emisores y reglas) y un límite global que deja pasar `/api/health`. La clave es la IP (una IPv4 mapeada a IPv6 vale como la IPv4; una IPv6 se agrupa por su prefijo /64). Al rechazar: 429 con `ProblemDetails` en español, `Retry-After` con los segundos que faltan y un aviso en el registro con la ruta, sin la IP. Las opciones se leen con `IOptions` al atender la solicitud, porque `Program.cs` lee su configuración antes de que `WebApplicationFactory` la cambie.
@@ -394,49 +397,62 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 ### Fase 6. Representación impresa en PDF
 Pedida el 22 de noviembre de 2026: además del XML, la app debe dejar **descargar la representación visual del CFDI**, el PDF. El dueño del proyecto pasó un ejemplo (el CFDI 3.3 de un banco: una hoja carta hecha con Microsoft Reporting Services, con logo, folio fiscal, emisor y receptor, conceptos, totales con letra, resumen de impuestos, datos del timbre, QR y sellos) para que la plantilla siga esa estructura. La plantilla es propia, con el logo de Comprobante y un lugar para el del emisor. Ni la marca ni los datos del ejemplo entran al repositorio: es la factura de un tercero.
 
-**Boceto hecho (22 de noviembre).** `docs/plantilla-pdf/` trae el logo (`logo.svg`) y dos hojas de ejemplo, una de un CFDI sin timbrar y otra de uno timbrado, con datos de prueba del SAT; su `LEEME.md` da las medidas y las reglas del diseño. El QR del boceto se leyó con un decodificador y devuelve la dirección del verificador del SAT. Falta que el dueño lo apruebe o pida cambios antes de programar.
+**Hecha el 22 de noviembre.** `docs/plantilla-pdf/` conserva el boceto del que partió el PDF: el logo (`logo.svg`) y dos hojas de ejemplo, una de un CFDI sin timbrar y otra de uno timbrado, con datos de prueba del SAT; su `LEEME.md` da las medidas y las reglas del diseño. El PDF real lo sigue, con las diferencias que se anotan en «Lo que cambió al programarla».
 
 La plantilla, de arriba abajo (hoja carta, márgenes de 12 mm, la identidad de la app: tinta, líneas suaves y el morado `#512bd4` en el título, las secciones y el total, con un tinte claro en los encabezados de tabla para que imprima bien):
 
 1. **Encabezado.** Caja del logo de 60 × 20 mm (el del proyecto por omisión, o el del emisor), el título según el tipo de comprobante (FACTURA para ingreso y NOTA DE CRÉDITO para egreso) y, a la derecha, dos cuadros: **Folio fiscal (UUID)** y **Serie-Folio** con la **Versión** (4.0).
 2. **Emisor y receptor.** Del emisor: nombre, RFC, régimen fiscal (clave y descripción) y lugar de expedición. Del receptor: nombre, RFC, uso del CFDI, régimen fiscal y domicilio fiscal, y residencia fiscal y número de registro tributario cuando vienen. El ejemplo es de 3.3: en 4.0 se agregan el régimen y el domicilio del receptor y la exportación.
 3. **Datos del comprobante.** Fecha y hora de emisión, tipo de comprobante, exportación, moneda, tipo de cambio, forma y método de pago, condiciones de pago e información global y CFDI relacionados (tipo de relación y UUID), cuando existen. Con timbre, también el número de serie del certificado del SAT, la fecha y hora de certificación y el RFC del proveedor de certificación.
-4. **Conceptos.** Tabla con clave de producto o servicio, unidad, cantidad, descripción (con el número de identificación), valor unitario, descuento, objeto de impuesto e importe; debajo de cada concepto, en letra chica, sus impuestos. El encabezado se repite en cada página y ningún concepto se parte entre dos.
+4. **Conceptos.** Tabla con clave de producto o servicio, unidad, cantidad, descripción (con el número de identificación), valor unitario, descuento, objeto de impuesto e importe; debajo de cada concepto, en letra chica, sus impuestos, uno por renglón. El encabezado se repite en cada página y ningún concepto se parte entre dos, salvo uno que se estima de más de 150 mm de alto (una descripción de mil caracteres con decenas de impuestos): ese se deja partir, porque pedirle a QuestPDF que mantuviera entero algo más alto que una hoja haría que fallara.
 5. **Totales.** Subtotal, descuento, impuestos trasladados, impuestos retenidos y total (con la sombra sólida de la tarjeta «registro» del sitio), y el **importe con letra** («DIEZ MIL SETECIENTOS OCHO PESOS 48/100 M.N.»).
 6. **Resumen de impuestos.** Trasladados (base, impuesto, tipo de factor, tasa o cuota e importe) y retenidos.
-7. **Sellos.** El código QR, la cadena original del complemento de certificación del SAT, el sello digital del emisor y el sello digital del SAT, en letra chica monoespaciada que se corta donde caiga (el Base64 no tiene espacios).
+7. **Sellos.** El código QR, la cadena original del complemento de certificación del SAT, el sello digital del emisor y el sello digital del SAT, en letra chica monoespaciada que se corta donde caiga (el Base64 no tiene espacios). Bajo el QR va un enlace al mismo verificador, para quien no pueda escanearlo.
 8. **Pie.** La leyenda «Este documento es una representación impresa de un CFDI», «Generado con Comprobante» y «Página X de Y».
 
-**Sin timbre y con timbre.** Lo que la app genera no está timbrado: no tiene UUID, certificado ni sello del SAT, y tampoco QR (el del SAT se arma con el UUID, así que no puede existir). Ese PDF lleva una franja «Comprobante de prueba · no timbrado» arriba, una marca de agua diagonal «Sin validez fiscal» en cada página, «SIN TIMBRAR» en el cuadro del folio fiscal y un recuadro «Sin timbre» donde iría el QR; sus sellos son la cadena original del comprobante y el sello del emisor. Un XML que ya trae el complemento `TimbreFiscalDigital` (se puede subir a Validar) sale completo y sin marca de agua. Como la app no verifica el timbre contra el SAT, el PDF no afirma validez: representa el XML, y el QR deja que quien lo reciba lo verifique en el portal del SAT.
+**Sin timbre y con timbre.** Lo que la app genera no está timbrado: no tiene UUID, certificado ni sello del SAT, y tampoco QR (el del SAT se arma con el UUID, así que no puede existir). Ese PDF lleva una franja «Comprobante de prueba · no timbrado · sin validez fiscal» arriba, una marca de agua diagonal «Sin validez fiscal» en cada página, «Sin timbrar» en el cuadro del folio fiscal y un recuadro «Sin timbre» donde iría el QR; sus sellos son la cadena original del comprobante y el sello del emisor. Un XML que ya trae el complemento `TimbreFiscalDigital` (se puede subir a Validar) sale completo y sin marca de agua. Como la app no verifica el timbre contra el SAT, el PDF no afirma validez: representa el XML, y el QR deja que quien lo reciba lo verifique en el portal del SAT.
 
-**El código QR** sigue el Anexo 20 (rubro I.E, igual para 3.3 y 4.0): la dirección `https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx` con `id` (el UUID), `re` (RFC del emisor), `rr` (RFC del receptor), `tt` (el total a 17 posiciones: 10 enteros, el punto y 6 decimales, por ejemplo `0000014300.000000`) y `fe` (los últimos 8 caracteres del sello del emisor). La cadena original del complemento de certificación se arma con el XSLT del timbre, `cadenaoriginal_TFD_1_1.xslt`, que ya está en `sat/xslt/`. Al empezar la fase hay que confirmar contra el Anexo 20 vigente el tamaño mínimo del QR y el orden de los campos.
+**El código QR** sigue el Anexo 20 (rubro I.E, igual para 3.3 y 4.0): la dirección `https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx` con `id` (el UUID), `re` (RFC del emisor), `rr` (RFC del receptor), `tt` (el total a 17 posiciones: 10 enteros, el punto y 6 decimales, por ejemplo `0000014300.000000`) y `fe` (los últimos 8 caracteres del sello del emisor). La cadena original del complemento de certificación se arma con el XSLT del timbre, `cadenaoriginal_TFD_1_1.xslt`, que ya está en `sat/xslt/`. En la fase se contrastó con guías que citan el Anexo 20 (el PDF oficial no se pudo abrir desde donde se trabajó): nivel de corrección de errores M como mínimo y los parámetros `id`, `re`, `rr`, `tt` y `fe`, en ese orden. El QR sale en vector, de 30 mm de lado (medido en el PDF) con 3 mm de zona de silencio por lado; esas guías dan 2.75 cm como tamaño mínimo impreso, un dato que queda por confirmar contra el texto oficial.
 
-**Decisiones propuestas** (se confirman al empezar la fase):
+**Lo que cambió al programarla** (frente al boceto):
 
-- **Biblioteca: QuestPDF**, en un proyecto nuevo, `Comprobante.Pdf` (el núcleo sigue sin paquetes de terceros). Dibuja con código tablas que se parten en páginas con el encabezado repetido, pie con «Página X de Y», marca de agua y texto que corta las cadenas largas, no necesita un navegador sin cabeza y puede etiquetar el PDF para accesibilidad (PDF/UA). Su licencia Community v3 (vigente desde el 6 de julio de 2026) es gratuita para individuos, para proyectos de código abierto con licencia aprobada por la OSI (este es MIT) y para negocios con ingresos menores a 1 millón de dólares al año; el sector público y las empresas que cotizan en bolsa no califican, aunque ganen menos. No es una licencia de código abierto, y el README lo dice. En Docker necesita las bibliotecas nativas de SkiaSharp (`SkiaSharp.NativeAssets.Linux.NoDependencies`) y las fuentes incrustadas en el ensamblado; la imagen de la API es Debian y corre sin privilegios, así que se prueba ahí antes de seguir. **Plan B:** PDFsharp y MigraDoc (MIT, sin bibliotecas nativas), cortando las cadenas a mano.
-- **QR:** QRCoder (MIT). En las pruebas, PdfPig para leer el texto del PDF y ZXing.Net para leer el QR.
-- **Tipografía:** Atkinson Hyperlegible y su versión monoespaciada (OFL), la del sitio y la app, en TTF incrustados; si no se consiguen, Lato, que ya trae QuestPDF.
-- **Del XML al PDF en dos pasos**, para probar cada uno por separado: `ConstructorDeRepresentacion` (en `Comprobante.Core`, con `ICatalogos`) arma `RepresentacionImpresa`, un registro con todo lo que se imprime ya formateado (descripciones de las claves, importes con su moneda, importe con letra, dirección del QR y cadena del complemento), y `Comprobante.Pdf` solo dibuja ese registro.
-- **API:** `POST /api/representaciones/pdf` (sección 8), con una cubeta propia en `Limites:Solicitudes` (`Pdf`, 10 por minuto: dibujar cuesta más que validar) y los mismos 400, 413, 415 y 429 de las demás rutas.
-- **Logo del emisor:** solo PNG o JPEG, con las comprobaciones de la sección 10. No se guarda: viaja en la solicitud y se descarta. Sin logo, sale el del proyecto.
-- **Cuándo se ofrece:** «Descargar PDF» va junto a «Descargar XML» en Generar (el XML recién sellado ya pasó el validador) y, en Validar, solo si el reporte no trae errores.
-- **El PDF en sí:** idioma `es-MX`, título y asunto en los metadatos (que también dicen «sin validez fiscal» cuando no hay timbre) y PDF etiquetado si la biblioteca lo permite.
+- Los rótulos y los encabezados de las tablas van en minúsculas y no en mayúsculas sostenidas: se leen mejor y algunos lectores de pantalla deletrean las palabras en mayúsculas. El título (FACTURA, NOTA DE CRÉDITO) sí va en mayúsculas.
+- La letra es Atkinson Hyperlegible Next y Mono, incrustadas, en lugar de Inter y DejaVu Sans Mono, que eran las que había a la mano para el boceto.
+- Las columnas de cifras de la tabla de conceptos miden lo que sus importes necesitan y lo que sobra es de la descripción; con importes enormes la letra se achica, hasta 5.5 pt, antes de dejar a la descripción en una tira donde cabe una letra por renglón. El total también se achica cuando tiene ocho dígitos o más.
+- Los impuestos de cada concepto van uno por renglón. El encabezado de la tabla se repite en cada hoja y, desde la segunda, hay un encabezado compacto que dice de qué comprobante es.
+- Con timbre, bajo el QR va un enlace al verificador del SAT (el boceto solo traía el texto).
+- El PDF va etiquetado para que un lector de pantalla lo recorra en orden (título, emisor y receptor, datos, conceptos, totales y sellos); lo decorativo (marca de agua, franja de prueba, encabezado compacto y pie) va como artefacto. Lleva idioma `es-MX`, título y asunto, que sin timbre dicen que es de prueba y sin validez fiscal. No se pasó por un verificador de PDF/UA ni se probó con un lector de pantalla.
+- La única opción del formulario es `incluirCadenaYSellos`; el plan hablaba de un campo genérico `opciones`.
+
+**Decisiones tomadas:**
+
+- **Biblioteca: QuestPDF 2026.9**, en un proyecto nuevo, `Comprobante.Pdf` (el núcleo sigue sin paquetes de terceros). Dibuja con código tablas que se parten en páginas con el encabezado repetido, pie con «Página X de Y», marca de agua y texto que corta las cadenas largas, no necesita un navegador sin cabeza y etiqueta el PDF para accesibilidad. Se confirmó dentro de la imagen de Docker de la API (Debian, sin privilegios): dibuja sin instalar ningún paquete nativo más (la imagen sigue con solo `curl` y `tzdata`), así que `SkiaSharp.NativeAssets.Linux.NoDependencies` no hizo falta y el plan B, PDFsharp y MigraDoc (MIT), quedó sin usar. Su licencia Community 3.0 (vigente desde el 6 de julio de 2026) es gratuita para individuos, para proyectos de código abierto con una licencia aprobada por la OSI (este es MIT) y para negocios con ingresos anuales menores a un millón de dólares; el sector público y las empresas que cotizan en bolsa no califican, aunque ganen menos. No es una licencia de código abierto (la propia QuestPDF la describe como comercial, con el código a la vista), y el README lo dice.
+- **QR:** QRCoder 1.9 (MIT), dibujado en vector (SVG) con nivel de corrección M. En las pruebas, PdfPig lee el texto del PDF y ZXing.Net lee el QR.
+- **Tipografía:** Atkinson Hyperlegible Next y Mono (OFL, las del sitio y la app) en TTF incrustados en el ensamblado, con `UseSystemFonts = false`: el PDF sale igual en Windows, Linux y el contenedor, y cada PDF lleva solo los glifos que usa. Cubren latín, griego y cirílico; un carácter que no tienen (un emoji, un ideograma, el árabe) sale como un cuadrito en lugar de detener la generación. Las licencias están junto a las fuentes, en `backend/src/Comprobante.Pdf/Fuentes/`.
+- **Del XML al PDF en dos pasos**, para probar cada uno por separado: `ConstructorDeRepresentacion` (en `Comprobante.Core`, con `ICatalogos`) arma `RepresentacionImpresa`, un registro con todo lo que se imprime ya formateado (descripciones de las claves, importes con su moneda, importe con letra, dirección del QR y cadena del complemento), y `Comprobante.Pdf` solo dibuja ese registro. Lo que el XML trae mal (un importe que no es número, una clave que no está en el catálogo, un atributo que falta) se imprime como viene o se omite: el PDF dibuja el XML, no lo valida.
+- **API:** `POST /api/representaciones/pdf` (sección 8), con tres frenos propios: el XML de 1 MB como máximo (la mitad de lo que se puede validar: cada concepto de más son renglones y hojas de más), una cubeta por IP en `Limites:Solicitudes` (`Pdf`, 10 por minuto: dibujar cuesta más que validar) y `Limites:PdfSimultaneos` (4 PDF a la vez en toda la API, sin fila: con todos los lugares ocupados, 429 con `Retry-After: 3`). Responde 400, 413, 415, 422 y 429 como `ProblemDetails`, y el PDF con `Cache-Control: no-store`. Si QuestPDF no puede acomodar el comprobante (`DocumentLayoutException`), `GeneradorPdf` lo convierte en `PdfNoGenerableException` y la API contesta 422.
+- **Logo del emisor:** solo PNG o JPEG, con las comprobaciones de la sección 10, hechas en dos tiempos: lo barato (peso, tipo y tamaño en píxeles, leídos del encabezado) antes de tomar un lugar para dibujar, y que el motor logre abrir la imagen ya con el lugar tomado. No se guarda: viaja en la solicitud y se descarta. Sin logo, sale el del proyecto.
+- **Cuándo se ofrece:** «Descargar PDF» va junto a «Descargar XML» en Generar (el XML recién sellado ya pasó el validador) y, en Validar, solo si el reporte no trae errores y el XML no pasa de 1 MB; apagado, dice por qué.
+- **El PDF en sí:** hoja carta, idioma `es-MX`, título («Factura H-2026-0042») y asunto en los metadatos, y el nombre de archivo `RFC-Serie-Folio-prueba.pdf` (sin serie ni folio, el UUID o la fecha; sin `-prueba` si ya está timbrado).
 
 - [x] Boceto de la plantilla con el logo de Comprobante en `docs/plantilla-pdf/`, para aprobar el diseño antes de programar.
-- [ ] Confirmar la biblioteca: QuestPDF con `SkiaSharp.NativeAssets.Linux.NoDependencies` pide un PDF de una página a la API dentro del contenedor, sin instalar nada más; si falla, plan B.
-- [ ] `ImporteConLetra` en `Comprobante.Core` (pesos y otras monedas, «UN MILLÓN DE PESOS…», «CIEN» y «CIENTO UN», centavos redondeados).
-- [ ] `RepresentacionImpresa` y `ConstructorDeRepresentacion`: del CFDI leído y de los catálogos al registro de impresión, con la dirección del QR y la cadena del complemento; con `TimbreFiscalDigital` toma sus datos y sin él arma el modo «sin timbre».
-- [ ] `Comprobante.Pdf`: la plantilla (encabezado, emisor y receptor, datos, conceptos con encabezado repetido, totales, resumen de impuestos, sellos y pie), el QR, la marca de agua y las fuentes incrustadas.
-- [ ] `POST /api/representaciones/pdf` con sus límites, la cubeta `Pdf` y la validación del logo.
-- [ ] Angular: «Descargar PDF» en Generar y en Validar, con el cuadro de opciones (logo con vista previa y cadena original) y el manejo de errores.
-- [ ] Pruebas (sección 11): importe con letra, constructor, texto y QR del PDF, la API y Vitest.
-- [ ] Revisión a ojo: los PDF de los cinco ejemplos y uno con muchos conceptos (más de una página, con el encabezado repetido), en el visor del navegador y al imprimir en carta.
-- [ ] Prueba de humo en la CI: pedir un PDF a la API en Docker y comprobar que empieza con `%PDF-`.
+- [x] Confirmar la biblioteca: QuestPDF dibuja un PDF dentro del contenedor de la API sin instalar nada más; el plan B no hizo falta.
+- [x] `ImporteConLetra` en `Comprobante.Core` (pesos y otras monedas, «UN MILLÓN DE PESOS…», «CIEN» y «CIENTO UN», centavos redondeados).
+- [x] `RepresentacionImpresa` y `ConstructorDeRepresentacion`: del CFDI leído y de los catálogos al registro de impresión, con la dirección del QR y la cadena del complemento; con `TimbreFiscalDigital` toma sus datos y sin él arma el modo «sin timbre».
+- [x] `Comprobante.Pdf`: la plantilla (encabezado, emisor y receptor, datos, conceptos con encabezado repetido, totales, resumen de impuestos, sellos y pie), el QR, la marca de agua y las fuentes incrustadas.
+- [x] `POST /api/representaciones/pdf` con sus límites, la cubeta `Pdf`, el tope de 4 PDF a la vez y la validación del logo.
+- [x] Angular: «Descargar PDF» en Generar y en Validar, con el cuadro de opciones (logo con vista previa y cadena original) y el manejo de errores.
+- [x] Pruebas (sección 11): importe con letra, constructor, texto y QR del PDF, comprobantes extremos, la API y Vitest.
+- [x] Revisión a ojo: los PDF de los cinco ejemplos con y sin timbre, con logo PNG y JPEG, sin sellos y con 70 conceptos (10 hojas sin timbre y 8 con él, con el encabezado de la tabla repetido y, desde la segunda hoja, el compacto), vistos hoja por hoja como imagen; el tamaño de hoja es carta (612 × 792 pt). No se imprimieron en papel.
+- [x] Prueba de humo en la CI: pedir un PDF a la API en Docker, a través de nginx, y comprobar que empieza con `%PDF-`, que es `application/pdf` y `attachment`, que no se guarda en caché y que un logo de 300 KB y un XML que no es CFDI se rechazan con 400.
+- [ ] Probar el cuadro de «Descargar PDF» y los PDF con un lector de pantalla (lo tiene que hacer una persona).
 
-**Entregable:** desde Generar se descarga el PDF de un CFDI recién sellado, con su marca de «sin validez fiscal», y desde Validar el de un XML con timbre de ejemplo, con un QR que lleva al verificador del SAT; los dos se ven bien en el visor del navegador y al imprimir en carta.
+**Verificado** con `dotnet test` (571 unitarias y 94 de integración; una prueba más, la que escribe los PDF de muestra para revisarlos a ojo, solo corre si se define `MUESTRAS_PDF`), `ng test` (262) y `ng build` (paquete inicial de 441 kB), con la prueba de humo de la CI corrida en local contra Docker y en el navegador, con la app real: en Validar, «Un CFDI sin errores» → «Descargar PDF» abre el cuadro (con el foco en «Elegir logo»), baja `WATM640917J45-H-2026-0042-prueba.pdf` (109 KB, empieza con `%PDF-`), lo cierra, devuelve el foco al botón y dice «Se descargó …»; con un logo de 300 × 100 px baja otro PDF (110 KB con el logo de prueba); con uno de 2500 × 100 px, el cuadro sigue abierto y muestra el mensaje del servidor junto al logo («El logo mide 2500 × 100 px; el máximo es 2000 × 2000 px.»); el cuadro se ve bien en claro y oscuro.
+
+**Entregable:** desde Generar se descarga el PDF de un CFDI recién sellado, con su marca de «sin validez fiscal», y desde Validar el de un XML con timbre de ejemplo, con un QR que lleva al verificador del SAT; los dos se ven bien en las hojas que se revisaron como imagen.
 
 ### Fase 7. Cierre para el portafolio
-- [x] README con descripción, capturas, diagrama, decisiones técnicas y cómo actualizar los archivos del SAT (hecho antes de la fase 6; al terminar el PDF se le agrega esa función, la licencia de QuestPDF y las capturas nuevas).
+- [x] README con descripción, capturas, diagrama, decisiones técnicas y cómo actualizar los archivos del SAT (con la función del PDF, la licencia de QuestPDF y sus capturas).
 - [ ] Artículo en el sitio, en `_posts/es` y `_posts/en`, con `repo` en el front matter.
 - [ ] En `_data/projects.yml`, agregar al proyecto `url`, `status: done` y `post`.
 - [ ] Decidir si hay demo pública (sección 14).
@@ -464,7 +480,7 @@ Confirmadas el 21 de noviembre de 2026:
 
 Agregada el 22 de noviembre de 2026:
 
-7. **Representación impresa en PDF:** la pidió el dueño del proyecto como una fase más (la 6; el cierre pasa a la 7), con una plantilla propia a partir de un ejemplo de CFDI y con logo. Propuesta técnica a confirmar al empezar la fase: QuestPDF en `Comprobante.Pdf`, con PDFsharp y MigraDoc como plan B.
+7. **Representación impresa en PDF:** la pidió el dueño del proyecto como una fase más (la 6; el cierre pasa a la 7), con una plantilla propia a partir de un ejemplo de CFDI y con logo. Se hizo con QuestPDF en `Comprobante.Pdf`, confirmado dentro de Docker; PDFsharp y MigraDoc quedaron como plan B sin usar.
 
 ---
 
@@ -493,9 +509,10 @@ Agregada el 22 de noviembre de 2026:
 | Carga y consulta de los catálogos grandes | PostgreSQL con índices `pg_trgm`; siembra idempotente con huella y candado; healthcheck con `start_period` para la primera carga (unos 14 s, medida en la fase 1) |
 | Las pruebas de integración y la CI necesitan Docker | Testcontainers levanta un PostgreSQL desechable; GitHub Actions ya trae Docker |
 | Reglas que dependen del padrón del SAT (nombre, régimen y código postal reales del receptor) | Quedan fuera (21 de las 129 reglas) y la app lo explica: valida forma y consistencia, no existencia. `GET /api/validaciones/reglas` las lista con su motivo |
-| La biblioteca de PDF no corre en la imagen de Docker (SkiaSharp usa bibliotecas nativas) o su licencia no encaja | `SkiaSharp.NativeAssets.Linux.NoDependencies`, fuentes incrustadas, una prueba en la imagen real antes de seguir y otra de humo en la CI; la licencia Community de QuestPDF queda en el README; plan B: PDFsharp y MigraDoc (MIT) |
+| La biblioteca de PDF no corre en la imagen de Docker (SkiaSharp usa bibliotecas nativas) o su licencia no encaja | Comprobado: QuestPDF dibuja en la imagen de la API (Debian, sin privilegios) sin paquetes nativos extra, y la prueba de humo de la CI lo vigila en cada pull request; las fuentes van incrustadas; la licencia Community de QuestPDF queda explicada en el README; plan B sin usar: PDFsharp y MigraDoc (MIT) |
 | Que alguien tome un PDF de prueba por una factura | Franja y marca de agua «Sin validez fiscal» en cada página, `-prueba.pdf` en el nombre del archivo y metadatos del PDF que lo dicen. Con timbre, el PDF no afirma validez: el QR lleva al verificador del SAT |
 | Un logo malicioso o enorme (bomba de descompresión) | Solo PNG y JPEG, tipo comprobado por los primeros bytes, 200 KB y 2000 × 2000 px como máximo, leídos del encabezado antes de decodificar; no se guarda |
+| Un XML raro o enorme que tumbe el PDF o gaste la memoria | XML de 1 MB como máximo, cubeta `Pdf` por IP y a lo más 4 PDF a la vez; si el motor no puede acomodar el comprobante avisa con `PdfNoGenerableException` y la API contesta 422; pruebas con 1,500 conceptos, 3,000 relacionados, cifras gigantes y comprobantes a los que les falta cualquier atributo o nodo |
 
 ---
 
@@ -519,4 +536,4 @@ Agregada el 22 de noviembre de 2026:
 - El total del QR va a 17 posiciones (10 enteros, el punto y 6 decimales): <https://contadormx.com/que-es-el-codigo-de-barras-bidimensional-en-los-cfdi-impresos-y-donde-se-generan/>
 - Qué debe llevar la representación impresa (la leyenda, los números de serie de los certificados del emisor y del SAT, las fechas de emisión y de certificación y el QR): <https://yo-facturo.com/blog/representacion-impresa-cfdi-mexico/> y <https://sigi.cucei.udg.mx/public-doc/20>
 - Ejemplo de representación gráfica de un CFDI 4.0 en una guía de llenado del propio SAT (Apéndice 4): <https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf>
-- QuestPDF: quién califica para la licencia Community <https://www.questpdf.com/license/guide.html> y dependencias nativas en Linux <https://www.questpdf.com/going-production/platform-specific-dependencies.html>
+- QuestPDF: los términos de la licencia Community 3.0 <https://www.questpdf.com/license/community.html>, quién califica <https://www.questpdf.com/license/guide.html> y dependencias nativas en Linux <https://www.questpdf.com/going-production/platform-specific-dependencies.html>
