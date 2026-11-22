@@ -232,6 +232,14 @@ try {
   await irA(resultado.arriba - MARGEN);
   await guardar('resultado.png');
 
+  // --- El cuadro de «Descargar PDF», sobre el resultado: se desplaza antes de abrirlo, porque con el cuadro abierto la página no se mueve ---
+  const cabecera = await posicionDe('section.resultado h3', 'XML generado');
+  await ponerVentana(740);
+  await irA(cabecera.arriba - 110);
+  await clic('Descargar PDF');
+  await esperar("document.querySelector('mat-dialog-container .mdc-dialog__surface')", 'el cuadro del PDF');
+  await guardar('dialogo-pdf.png');
+
   // --- Validar un XML con errores: el reporte de hallazgos ---
   await abrir('/validar', 'light');
   await clic('Un CFDI con errores');
