@@ -1,6 +1,6 @@
 # En cada pull request y en cada push a main: compila y prueba el backend y el frontend, y levanta los tres
 # contenedores para comprobar que la app responde a través de nginx y que nginx pone las cabeceras de seguridad, la CSP
-# y los límites de solicitudes y de tamaño.
+# y los límites de solicitudes y de tamaño, y que la API dibuja un PDF.
 name: CI
 
 on:
@@ -82,6 +82,31 @@ jobs:
           echo "$lineas" | tr -d '\r' | grep -qx '429 application/problem+json'
           echo "$lineas" | tr -d '\r' | grep -qx '200 application/json; charset=utf-8'
           echo 'cabeceras y límites: bien'
+      - name: Probar el PDF a través de nginx
+        run: |
+          set -euo pipefail
+          raiz="$PWD"
+          cd "$(mktemp -d)"
+          # El PDF lo dibuja la API a través de nginx: un XML de CFDI 4.0 da un PDF (con su tipo, su nombre y sin caché), y lo que no
+          # sirve se explica con un 400 en problem+json, campo por campo.
+          cp "$raiz/frontend/public/ejemplos/ingreso-valido.xml" ejemplo.xml
+          curl -fsS -D pdf.txt -o factura.pdf -F 'xml=@ejemplo.xml;type=application/xml' http://localhost:8081/api/representaciones/pdf
+          test "$(head -c 5 factura.pdf)" = '%PDF-'
+          grep -qi '^content-type: application/pdf' pdf.txt
+          grep -qi '^content-disposition: attachment; filename=' pdf.txt
+          grep -qi '^cache-control: no-store' pdf.txt
+          test "$(wc -c < factura.pdf)" -gt 10000
+          # Un logo de más de 200 KB se rechaza con un 400 que lo explica en su campo, sin dibujar nada.
+          head -c 300000 /dev/zero > logo.png
+          estado=$(curl -s -o logo.json -w '%{http_code}' -F 'xml=@ejemplo.xml;type=application/xml' -F 'logo=@logo.png;type=image/png' http://localhost:8081/api/representaciones/pdf)
+          test "$estado" = 400
+          grep -q '"logo"' logo.json
+          # Lo que no es un CFDI 4.0 también es un 400, en el campo del XML.
+          echo '<a/>' > otro.xml
+          estado=$(curl -s -o xml.json -w '%{http_code}' -F 'xml=@otro.xml;type=application/xml' http://localhost:8081/api/representaciones/pdf)
+          test "$estado" = 400
+          grep -q '"xml"' xml.json
+          echo 'PDF: bien'
       - name: Ver los logs
         if: failure()
         run: docker compose logs
