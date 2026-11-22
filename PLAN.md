@@ -4,7 +4,7 @@ Aplicación web y librería .NET para armar, sellar y validar comprobantes fisca
 
 > **Nombre de trabajo: Comprobante** (el nodo raíz del CFDI). En tu sitio aparece como "Generador y validador de XML CFDI 4.0 (sin timbrado)". El nombre y el repositorio quedaron confirmados (sección 14).
 
-> **Sin validez fiscal.** La app no timbra ni envía nada al SAT ni a un PAC: los XML que genera no son facturas válidas. Lo dicen la pantalla, el README y el nombre del archivo descargado (`…-prueba.xml`).
+> **Sin validez fiscal.** La app no timbra ni envía nada al SAT ni a un PAC: los XML que genera no son facturas válidas. Lo dicen la pantalla, el README y el nombre de los archivos descargados (`…-prueba.xml` y `…-prueba.pdf`) y la marca de agua del PDF.
 
 Dónde vive cada cosa:
 
@@ -24,13 +24,14 @@ Dónde vive cada cosa:
 - **Validar** cualquier XML CFDI 4.0: esquemas XSD del SAT, reglas de la matriz de errores (catálogos, cálculos y relaciones entre campos) y el sello contra su certificado. Cada falla trae su código del SAT (por ejemplo, `CFDI40161`), el nodo y un mensaje en español.
 - **Catálogos del SAT** con la fecha de su versión, para las validaciones y para buscar claves: productos y servicios, unidades, códigos postales, usos de CFDI, regímenes, formas de pago, monedas, tasas o cuotas…
 - **Ver** el XML formateado, la cadena original, el sello y los datos del certificado, y descargar el XML.
+- **Descargar la representación impresa en PDF** (fase 6): una plantilla propia en hoja carta, con logo, emisor y receptor, conceptos, totales con letra, resumen de impuestos, sellos y, si el XML ya trae el timbre, el código QR de verificación del SAT. Un CFDI sin timbrar sale con la marca de agua «Sin validez fiscal».
 
 ### No incluye (extensiones posibles)
 
 - Timbrado (PAC y Timbre Fiscal Digital), cancelación y consulta del estatus en el SAT.
 - Validaciones que dependen de servicios del SAT: que el RFC exista y que su nombre, régimen y código postal coincidan con el padrón, o que el CSD esté vigente en la lista del SAT. La app revisa forma y consistencia, no existencia, y lo dice.
 - Complementos: Pagos 2.0 (la extensión más útil), Carta Porte, Nómina y Comercio Exterior. Un XML con complementos se valida en su parte CFDI y los complementos aparecen como "no revisados".
-- Representación impresa en PDF, CFDI de retenciones y addendas.
+- CFDI de retenciones y addendas.
 - Firmar con el CSD propio del usuario en la app: una llave privada real no debe subir a un servidor. La librería sí lo permite para uso local (extensión: CLI).
 
 ---
@@ -43,6 +44,7 @@ Dónde vive cada cosa:
 | API | ASP.NET Core 11 con minimal APIs, OpenAPI y Scalar en desarrollo |
 | Catálogos | PostgreSQL 18 con Entity Framework Core 11 (Npgsql): tablas, migraciones y búsqueda con índices `pg_trgm`. Los CSV versionados en el repositorio son la fuente y se cargan a la base al arrancar. Importador del Excel del SAT con ExcelDataReader |
 | Frontend | Angular 22 (última 22.x), Angular Material, zoneless, Signal Forms y Vitest |
+| PDF (fase 6) | QuestPDF (licencia Community) en un proyecto aparte, `Comprobante.Pdf`, y QRCoder (MIT) para el código QR. Solo en pruebas: PdfPig y ZXing.Net, para leer el texto y el QR del PDF generado. La biblioteca se confirma con una prueba en la imagen de Docker al empezar la fase |
 | Pruebas | xUnit, WebApplicationFactory con Testcontainers (un PostgreSQL real y desechable) y archivos de referencia (XML y cadenas originales esperadas); Vitest en Angular |
 | Infraestructura | Docker Compose con tres contenedores (nginx con Angular, la API y PostgreSQL) y GitHub Actions |
 
@@ -69,6 +71,7 @@ flowchart LR
       API[Endpoints]
       CORE["Comprobante.Core: cálculo, XML, cadena original, sello y validador"]
       CAT["Comprobante.Catalogos: EF Core"]
+      PDF["Comprobante.Pdf: representación impresa en PDF (fase 6)"]
     end
     DB[("db: PostgreSQL 18, catálogos del SAT")]
   end
@@ -77,6 +80,8 @@ flowchart LR
   WEB -- "/api" --> API
   API --> CORE
   API --> CAT
+  API --> PDF
+  PDF -- "RepresentacionImpresa" --> CORE
   CORE -- "ICatalogos" --> CAT
   CAT --> DB
   CAT -. "siembra si la huella cambió" .-> SAT
@@ -101,6 +106,7 @@ Comprobante/                            F:\Respaldo\Respaldo\Cursos\Comprobante 
 ├── README.md                           qué hace, cómo levantarlo y cómo actualizar los archivos del SAT
 ├── docker-compose.yml                  web, api y db
 ├── .env.example                        puertos y contraseña de la base (distintos a los de Mediateca)
+├── docs/                               banner y capturas del README (con el script que las toma) y el boceto de la plantilla del PDF (plantilla-pdf/)
 ├── sat/
 │   ├── descargar.ps1, fuentes.json     de dónde sale cada archivo, cuándo se bajó y su huella
 │   ├── origen/                         lo que baja descargar.ps1 (el Excel de catálogos, la matriz de errores y PDF); no va a git
@@ -116,6 +122,7 @@ Comprobante/                            F:\Respaldo\Respaldo\Cursos\Comprobante 
 │   │   ├── Comprobante.Core/           solicitud, cálculo y redondeo, XML, cadena original, sello, validador y reglas
 │   │   ├── Comprobante.Catalogos/      EF Core: modelo, migraciones, siembra y consultas
 │   │   ├── Comprobante.Herramientas/   importador del Excel del SAT (consola)
+│   │   ├── Comprobante.Pdf/            plantilla de la representación impresa en PDF (fase 6)
 │   │   └── Comprobante.Api/            endpoints, límites y OpenAPI
 │   └── tests/
 │       ├── Comprobante.UnitTests/      incluye Referencia/: XML sellados y cadenas originales hechos con Python, lxml y OpenSSL
@@ -219,10 +226,11 @@ Un complemento que la app no trae en sus esquemas (Pagos, Nómina, Comercio Exte
 | `POST /api/comprobantes` | Genera y sella con el emisor de prueba elegido: `{ xml, cadenaOriginal, sello, noCertificado, calculo, validacion }` |
 | `POST /api/validaciones` | Recibe el XML en el cuerpo (`application/xml` o `text/xml`, hasta 2 MB) y devuelve el reporte: `{ esValido, hallazgos, selloValido, cadenaOriginal, certificado }`. Un XML con errores es un 200 con sus hallazgos, no un error de la solicitud |
 | `GET /api/validaciones/reglas` | Las 129 reglas de la matriz de errores y lo que la app hace con cada una (`revisada`, `parcial` o `noRevisada`, con su motivo) |
+| `POST /api/representaciones/pdf` (fase 6) | Recibe en `multipart/form-data` el XML (`xml`, hasta 2 MB) y, si se quiere, un logo (`logo`, PNG o JPEG de hasta 200 KB) y opciones (`opciones`). Devuelve la representación impresa en `application/pdf`, con el nombre `{RFC}-{Serie}-{Folio}-prueba.pdf` (sin `-prueba` si el XML trae timbre) |
 | `GET /api/catalogos` · `GET /api/catalogos/{nombre}?q=&pagina=&tamano=` | Versión y tamaño de los catálogos, y búsqueda paginada de claves |
 | `GET /api/openapi/v1.json` · `GET /api/scalar` | La descripción OpenAPI y la página para probar la API |
 
-- Errores con `ProblemDetails` en español: 400 con los errores por campo, 413 si el XML pasa del límite, 415 si no es XML y 429, con `Retry-After`, si se excede el límite de solicitudes.
+- Errores con `ProblemDetails` en español: 400 con los errores por campo, 413 si el XML o el JSON pasan del límite, 415 si no es XML y 429, con `Retry-After`, si se excede el límite de solicitudes.
 - La API se documenta con OpenAPI y se explora con Scalar, también en producción: no tiene nada privado. Todo vive bajo `/api`, así nginx lo pasa con una sola regla.
 
 ---
@@ -243,6 +251,7 @@ Prácticas, las mismas que en Mediateca:
 - `httpResource` leído siempre con `hasValue()` antes de `value()`.
 - **Ejemplos precargados:** ingreso con IVA y retenciones, venta a público en general, factura en dólares y egreso relacionado con un ingreso. Sirven para la demo y para las capturas.
 - El visor de XML resalta la sintaxis con un componente propio, sin librerías pesadas.
+- **Descargar PDF** (fase 6): un botón junto a «Descargar XML» en Generar y, en Validar, solo cuando el reporte no trae errores (un PDF bien presentado de un CFDI con errores engaña). Un cuadro de opciones deja subir el logo del emisor, con vista previa, e incluir la cadena original; el logo solo vive en memoria.
 
 ---
 
@@ -252,7 +261,8 @@ Prácticas, las mismas que en Mediateca:
 - **Nada se guarda:** ni el XML ni los formularios se guardan o se registran. Los registros solo llevan tamaño, duración y resultado.
 - **Solo CSD de prueba:** sus llaves y su contraseña son públicas, y la API nunca recibe llaves.
 - **Límite de solicitudes** por IP y por minuto, con cubetas separadas para generar, validar, calcular y consultar, y una global (`Limites` en la configuración): al pasarse, 429 con `Retry-After`.
-- **Cabeceras en nginx:** `Content-Security-Policy`, `X-Content-Type-Options` y `server_tokens off`.
+- **Cabeceras en nginx:** `Content-Security-Policy` en la app web, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy` en todo, `server_tokens off` y sin la cabecera `Server` de Kestrel.
+- **PDF y logo (fase 6):** el PDF se dibuja solo con texto y números del XML leído con la lectura segura, sin HTML de por medio. El logo es opcional y solo PNG o JPEG (nada de SVG), con el tipo comprobado por los primeros bytes y 200 KB y 2000 × 2000 px como máximo, leídos del encabezado antes de decodificar (contra las bombas de descompresión); no se guarda.
 - **Sin cuentas ni sesiones:** no hay datos personales que proteger más allá de la solicitud en curso.
 
 ---
@@ -272,7 +282,8 @@ Prácticas, las mismas que en Mediateca:
   - 413, 415, 429 y un XML con XXE rechazado;
   - los catálogos cargan en un PostgreSQL desechable (Testcontainers, necesita Docker) y la búsqueda responde.
 - **Frontend (Vitest):** formulario de conceptos y totales, validador (archivo → reporte) y los servicios de la API.
-- **CI (GitHub Actions):** compilar y probar el backend, probar y compilar Angular, y una prueba de humo que levanta los tres contenedores y consulta `/api/health` a través de nginx.
+- **PDF (fase 6):** el importe con letra con muchos casos; el armado de la representación con los cinco XML de referencia y uno con un timbre inventado; el PDF generado (su texto, leído con PdfPig, y su QR, leído con ZXing.Net, que devuelve la dirección del SAT con sus cinco parámetros); la API (200, nombre del archivo, 400, 413, 415, logo falso o enorme y 429) y, en Vitest, el botón y el cuadro de opciones.
+- **CI (GitHub Actions):** compilar y probar el backend, probar y compilar Angular, y una prueba de humo que levanta los tres contenedores, consulta `/api/health` a través de nginx y comprueba sus cabeceras, el 413 y el 429.
 
 ---
 
@@ -310,7 +321,7 @@ Prácticas, las mismas que en Mediateca:
 
 Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase 0 se trabaja con ramas y pull requests.
 
-**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 355 pruebas unitarias y 50 de integración en el backend y 201 con Vitest en el frontend. Lo siguiente: la fase 5 (seguridad y pulido), que ya tiene su diseño en las notas «Para retomar» de la fase pero ningún código; después, la fase 6.
+**Dónde vamos (22 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 355 pruebas unitarias y 67 de integración en el backend y 215 con Vitest en el frontend. La app tomó la identidad visual de mi sitio (morado, Atkinson Hyperlegible, tema claro u oscuro) y la fase 5 (seguridad y pulido) está hecha, salvo la prueba con un lector de pantalla: límites de solicitudes y de tamaño en la API y en nginx, cabeceras de seguridad con CSP y registros sin contenido, verificados con Docker y en el navegador. El README ya está, con su banner, sus capturas (las toma un script, `docs/capturas/tomar-capturas.mjs`), el estado, la seguridad y las cifras revisadas contra la API y el arranque en frío (33.7 s en total, 13.8 s para cargar los 151,346 registros de catálogos); al tomar las capturas apareció y se corrigió un desborde del número de certificado del emisor en Generar. Lo siguiente: la fase 6 (representación impresa en PDF, pedida el 22 de noviembre, con su boceto ya hecho en `docs/plantilla-pdf/`) y la fase 7 (cierre para el portafolio).
 
 ### Fase 0. Base del proyecto
 - [x] Confirmar las decisiones de la sección 14.
@@ -363,25 +374,69 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 **Entregable:** desde el navegador se genera un CFDI, se descarga y, al volver a validarlo, no tiene hallazgos. Verificado con los cinco ejemplos contra la API real (la descarga, sin guardar el archivo: nombre, tipo, tamaño y sello) y con uno de ellos subido a la pantalla Validar.
 
 ### Fase 5. Seguridad y pulido
-- [ ] Límites de tamaño y de solicitudes, cabeceras de nginx y registros sin contenido.
-- [ ] Pruebas de integración de seguridad: XXE, 413, 415 y 429.
-- [ ] Revisión de accesibilidad y del modo oscuro. Adelantada en la fase 4 y verificada por código en el navegador: contraste AA de todo el texto en las cuatro pantallas, en claro y oscuro; anillo de foco visible en todos los controles de las cuatro pantallas; nombres accesibles, títulos sin saltos y regiones; enlace del pie con blanco de pulsación de 24 px. Falta probar con un lector de pantalla.
+- [x] Límites de tamaño y de solicitudes, cabeceras de nginx y registros sin contenido.
+- [x] Pruebas de integración de seguridad: XXE, 413, 415 y 429. La CI, además, levanta Docker y comprueba las cabeceras, el 413 y el 429 de nginx.
+- [ ] Revisión de accesibilidad y del modo oscuro. Hecha en la fase 4 y repetida tras el cambio de estilo: contraste AA de todo el texto en las cuatro pantallas, en claro y oscuro (una auditoría calcula la razón de contraste de cada texto, también el del XML resaltado en las líneas con hallazgos); anillo de foco visible con el teclado; nombres accesibles, títulos sin saltos y regiones; celular de 375 px sin desbordes. Falta probar con un lector de pantalla, que tiene que hacer una persona.
 
-**Para retomar la fase 5.** Está diseñada y no tiene código todavía; el árbol de trabajo quedó limpio (rama `main`, 5 commits adelante de `comprobante/main`: las fases 3 y 4 sin subir). Lo decidido:
+**Lo que quedó.** Todo verificado con `dotnet test` (355 unitarias y 67 de integración), `ng test` (215), Docker y el navegador.
 
-- **Qué ya existe:** el XML de hasta 2 MB con 413, 415 y prueba de XXE en `/api/validaciones` (`EndpointsValidaciones`); `server_tokens off` y `client_max_body_size 2m` en `frontend/nginx.conf`; `ASPNETCORE_FORWARDEDHEADERS_ENABLED` en `docker-compose.yml` (la API solo se publica en `127.0.0.1`, así que la IP real llega por el `X-Forwarded-For` de nginx, cuyo último valor es el que vio nginx). **No existe todavía:** rate limiting, tope del JSON, registros mínimos, CSP ni cabeceras de seguridad.
 - **Configuración:** el bloque `Limites` de la sección 12. El límite del XML no se configura: lo fijan el lector del Core (`LectorXmlSeguro`) y el endpoint. El cálculo en vivo de Generar manda hasta 2,5 solicitudes por segundo (espera de 400 ms), por eso su cubeta es la más holgada, y cargar un ejemplo hace unas 20 consultas de catálogo.
-- **API** (carpeta `Seguridad/` en `Comprobante.Api`; las opciones se leen con `IOptions` al atender la solicitud, porque `Program.cs` lee su configuración antes de que `WebApplicationFactory` la cambie): `AddRateLimiter` con ventana deslizante de un minuto y 6 segmentos, sin cola, una política por cubeta (`.RequireRateLimiting(...)` en cálculo, generación, validación, catálogos, emisores y reglas) y un `GlobalLimiter` que deja pasar `/api/health`. La clave es la IP (en IPv6, el prefijo /64). Al rechazar: 429 con `ProblemDetails` en español, `Retry-After` y un aviso en el registro sin la IP.
-- **Tope del cuerpo:** middleware propio para el JSON (cálculo y generación): 413 si `Content-Length` pasa del límite y flujo con tope para los cuerpos sin longitud (`TestServer` no aplica los límites de Kestrel, así que se prueba ahí). Kestrel: `MaxRequestBodySize` de 2 MiB como respaldo y `AddServerHeader = false`.
-- **Registros sin contenido:** `UseHttpLogging` con método, ruta sin la consulta, estado, duración y `Content-Length` (`/api/health` sin registrar); categoría `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware` en `Information` en `appsettings.json`. En nginx, un `access_log` sin IP, sin consulta y sin agente de usuario.
-- **Pruebas:** `ApiFactory` con límites altos y `ForwardedHeaders_Enabled=true` (para simular clientes con `X-Forwarded-For`); `SeguridadApiTests` con `WithWebHostBuilder` y límites bajos: 429 con `Retry-After`, IP distintas con cubetas independientes, `/api/health` sin límite, 413 del JSON con y sin longitud, 415, XXE y bomba de entidades sin filtrar contenido ni tardar. Una unitaria de la clave por IP (IPv4, IPv4 mapeada a IPv6 y /64). En el frontend, revisar qué muestran Generar y los totales con un 429 (debe decir cuánto esperar) y probarlo.
-- **nginx:** las cabeceras van en un archivo que se incluye en cada `location` (un `add_header` dentro de un `location` descarta los del `server`): `Content-Security-Policy` (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` y `Permissions-Policy` sin cámara, micrófono ni geolocalización. Antes, revisar el `index.html` compilado: si el `<link>` de estilos trae un `onload`, la CSP lo bloquea y la app quedaría sin estilos (habría que desactivar el CSS crítico en línea en `angular.json`). Además: `client_max_body_size` de 1m y de 2m solo en `/api/validaciones`, `limit_req` holgado como freno previo (20 r/s con ráfaga de 60 y `limit_req_status 429`) y los 413 y 429 de nginx como `application/problem+json` en español bajo `/api/`.
-- **Al terminar:** `dotnet test backend\Comprobante.slnx -c Release --nologo` (hoy 355 unitarias y 50 de integración, esta con Docker), `npx ng test --watch=false` en `frontend` (hoy 201), `docker compose up -d --build --wait`, y en el navegador las cuatro pantallas sin violaciones de la CSP en la consola, generar → validar y un 429 provocado. Después, la fase 6 (README con capturas, artículo en el sitio y demo).
+- **Límite de solicitudes** (`Comprobante.Api/Seguridad/LimiteDeSolicitudes`): ventana deslizante de un minuto con 6 segmentos y sin cola, una política por cubeta (`.RequireRateLimiting(...)` en cálculo, generación, validación y en las consultas de catálogos, emisores y reglas) y un límite global que deja pasar `/api/health`. La clave es la IP (una IPv4 mapeada a IPv6 vale como la IPv4; una IPv6 se agrupa por su prefijo /64). Al rechazar: 429 con `ProblemDetails` en español, `Retry-After` con los segundos que faltan y un aviso en el registro con la ruta, sin la IP. Las opciones se leen con `IOptions` al atender la solicitud, porque `Program.cs` lee su configuración antes de que `WebApplicationFactory` la cambie.
+- **Tope del cuerpo** (`LimiteDeCuerpoJson`): 413 para el JSON de cálculo y generación si pasa de `JsonMaximoBytes`; con `Content-Length` se decide sin leer nada y un cuerpo sin longitud se lee con tope. Kestrel queda de respaldo, con `MaxRequestBodySize` de 3 MiB y sin la cabecera `Server`.
+- **Registros sin contenido** (`RegistroDeSolicitudes`): un renglón por solicitud con método, ruta sin la consulta, estado, duración y bytes recibidos; nunca el cuerpo, las cabeceras, la consulta ni la IP, y `/api/health` no se registra.
+- **nginx** (`frontend/nginx.conf` y `frontend/nginx-cabeceras.conf`): `limit_req` de 20 solicitudes por segundo con ráfaga de 60 como freno previo a los límites finos de la API, `client_max_body_size` de 3 MB, y los 413 y 429 de nginx salen como `application/problem+json` en español (con `Retry-After` en el 429). Las cabeceras (`X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy`) viven en un archivo que se incluye en cada `location`, porque un `add_header` dentro de un `location` descarta los del `server`. La `Content-Security-Policy` (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`) va solo en la app web, porque la página de Scalar necesita scripts en línea. La app solo se lee (`limit_except GET`); a la API se le pasa como `X-Forwarded-For` la IP que ve nginx (lo que mande el cliente se descarta); el registro de accesos no lleva IP, consulta ni agente de usuario, ni los healthchecks de Docker; y los tiempos de espera son cortos. Angular compila sin CSS crítico en línea (`optimization.styles.inlineCritical`): su `<link onload>` lo bloquearía la CSP.
+- **Pruebas:** `ApiFactory` con límites altos y `FORWARDEDHEADERS_ENABLED`; `SeguridadApiTests` con `WithWebHostBuilder` y límites bajos (429 con `Retry-After`, cuotas independientes por IP y por cubeta, IPv6 por /64, `/api/health` sin límite, 413 del JSON con y sin longitud, y que el registro no lleve contenido), `ClaveDeClienteTests` y, en el frontend, los textos del 429 y del 413 de nginx y de la API en `aErrorApi` y en los totales en vivo.
+- **Verificado a mano con Docker:** una ráfaga de 150 solicitudes dio 68 respuestas normales y 82 con 429 de nginx (`application/problem+json`, `Retry-After: 1`); contra la API directa, 429 con los segundos que faltan; 4 MB de cuerpo, 413 de nginx; 2,5 MB, 413 de la API; el registro de nginx y el de la API no traen IP ni consulta; la pantalla muestra el aviso del 429; y las cuatro pantallas cargan sin violaciones de la CSP (la consola sí registra las que se provocan a propósito).
+- **De paso:** las opciones de los campos de Material pasaron de `app.config.ts` a las páginas con formularios y el paquete inicial bajó de 570 a 431 kB (Angular Forms ya no se carga en la portada).
 
-**Entregable:** las pruebas de seguridad pasan en la CI y la app se usa con teclado y lector de pantalla.
+**Entregable:** las pruebas de seguridad pasan en la CI y la app se usa con teclado y lector de pantalla (esto último, pendiente).
 
-### Fase 6. Cierre para el portafolio
-- [ ] README con descripción, capturas, diagrama, decisiones técnicas y cómo actualizar los archivos del SAT.
+### Fase 6. Representación impresa en PDF
+Pedida el 22 de noviembre de 2026: además del XML, la app debe dejar **descargar la representación visual del CFDI**, el PDF. El dueño del proyecto pasó un ejemplo (el CFDI 3.3 de un banco: una hoja carta hecha con Microsoft Reporting Services, con logo, folio fiscal, emisor y receptor, conceptos, totales con letra, resumen de impuestos, datos del timbre, QR y sellos) para que la plantilla siga esa estructura. La plantilla es propia, con el logo de Comprobante y un lugar para el del emisor. Ni la marca ni los datos del ejemplo entran al repositorio: es la factura de un tercero.
+
+**Boceto hecho (22 de noviembre).** `docs/plantilla-pdf/` trae el logo (`logo.svg`) y dos hojas de ejemplo, una de un CFDI sin timbrar y otra de uno timbrado, con datos de prueba del SAT; su `LEEME.md` da las medidas y las reglas del diseño. El QR del boceto se leyó con un decodificador y devuelve la dirección del verificador del SAT. Falta que el dueño lo apruebe o pida cambios antes de programar.
+
+La plantilla, de arriba abajo (hoja carta, márgenes de 12 mm, la identidad de la app: tinta, líneas suaves y el morado `#512bd4` en el título, las secciones y el total, con un tinte claro en los encabezados de tabla para que imprima bien):
+
+1. **Encabezado.** Caja del logo de 60 × 20 mm (el del proyecto por omisión, o el del emisor), el título según el tipo de comprobante (FACTURA para ingreso y NOTA DE CRÉDITO para egreso) y, a la derecha, dos cuadros: **Folio fiscal (UUID)** y **Serie-Folio** con la **Versión** (4.0).
+2. **Emisor y receptor.** Del emisor: nombre, RFC, régimen fiscal (clave y descripción) y lugar de expedición. Del receptor: nombre, RFC, uso del CFDI, régimen fiscal y domicilio fiscal, y residencia fiscal y número de registro tributario cuando vienen. El ejemplo es de 3.3: en 4.0 se agregan el régimen y el domicilio del receptor y la exportación.
+3. **Datos del comprobante.** Fecha y hora de emisión, tipo de comprobante, exportación, moneda, tipo de cambio, forma y método de pago, condiciones de pago e información global y CFDI relacionados (tipo de relación y UUID), cuando existen. Con timbre, también el número de serie del certificado del SAT, la fecha y hora de certificación y el RFC del proveedor de certificación.
+4. **Conceptos.** Tabla con clave de producto o servicio, unidad, cantidad, descripción (con el número de identificación), valor unitario, descuento, objeto de impuesto e importe; debajo de cada concepto, en letra chica, sus impuestos. El encabezado se repite en cada página y ningún concepto se parte entre dos.
+5. **Totales.** Subtotal, descuento, impuestos trasladados, impuestos retenidos y total (con la sombra sólida de la tarjeta «registro» del sitio), y el **importe con letra** («DIEZ MIL SETECIENTOS OCHO PESOS 48/100 M.N.»).
+6. **Resumen de impuestos.** Trasladados (base, impuesto, tipo de factor, tasa o cuota e importe) y retenidos.
+7. **Sellos.** El código QR, la cadena original del complemento de certificación del SAT, el sello digital del emisor y el sello digital del SAT, en letra chica monoespaciada que se corta donde caiga (el Base64 no tiene espacios).
+8. **Pie.** La leyenda «Este documento es una representación impresa de un CFDI», «Generado con Comprobante» y «Página X de Y».
+
+**Sin timbre y con timbre.** Lo que la app genera no está timbrado: no tiene UUID, certificado ni sello del SAT, y tampoco QR (el del SAT se arma con el UUID, así que no puede existir). Ese PDF lleva una franja «Comprobante de prueba · no timbrado» arriba, una marca de agua diagonal «Sin validez fiscal» en cada página, «SIN TIMBRAR» en el cuadro del folio fiscal y un recuadro «Sin timbre» donde iría el QR; sus sellos son la cadena original del comprobante y el sello del emisor. Un XML que ya trae el complemento `TimbreFiscalDigital` (se puede subir a Validar) sale completo y sin marca de agua. Como la app no verifica el timbre contra el SAT, el PDF no afirma validez: representa el XML, y el QR deja que quien lo reciba lo verifique en el portal del SAT.
+
+**El código QR** sigue el Anexo 20 (rubro I.E, igual para 3.3 y 4.0): la dirección `https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx` con `id` (el UUID), `re` (RFC del emisor), `rr` (RFC del receptor), `tt` (el total a 17 posiciones: 10 enteros, el punto y 6 decimales, por ejemplo `0000014300.000000`) y `fe` (los últimos 8 caracteres del sello del emisor). La cadena original del complemento de certificación se arma con el XSLT del timbre, `cadenaoriginal_TFD_1_1.xslt`, que ya está en `sat/xslt/`. Al empezar la fase hay que confirmar contra el Anexo 20 vigente el tamaño mínimo del QR y el orden de los campos.
+
+**Decisiones propuestas** (se confirman al empezar la fase):
+
+- **Biblioteca: QuestPDF**, en un proyecto nuevo, `Comprobante.Pdf` (el núcleo sigue sin paquetes de terceros). Dibuja con código tablas que se parten en páginas con el encabezado repetido, pie con «Página X de Y», marca de agua y texto que corta las cadenas largas, no necesita un navegador sin cabeza y puede etiquetar el PDF para accesibilidad (PDF/UA). Su licencia Community v3 (vigente desde el 6 de julio de 2026) es gratuita para individuos, para proyectos de código abierto con licencia aprobada por la OSI (este es MIT) y para negocios con ingresos menores a 1 millón de dólares al año; el sector público y las empresas que cotizan en bolsa no califican, aunque ganen menos. No es una licencia de código abierto, y el README lo dice. En Docker necesita las bibliotecas nativas de SkiaSharp (`SkiaSharp.NativeAssets.Linux.NoDependencies`) y las fuentes incrustadas en el ensamblado; la imagen de la API es Debian y corre sin privilegios, así que se prueba ahí antes de seguir. **Plan B:** PDFsharp y MigraDoc (MIT, sin bibliotecas nativas), cortando las cadenas a mano.
+- **QR:** QRCoder (MIT). En las pruebas, PdfPig para leer el texto del PDF y ZXing.Net para leer el QR.
+- **Tipografía:** Atkinson Hyperlegible y su versión monoespaciada (OFL), la del sitio y la app, en TTF incrustados; si no se consiguen, Lato, que ya trae QuestPDF.
+- **Del XML al PDF en dos pasos**, para probar cada uno por separado: `ConstructorDeRepresentacion` (en `Comprobante.Core`, con `ICatalogos`) arma `RepresentacionImpresa`, un registro con todo lo que se imprime ya formateado (descripciones de las claves, importes con su moneda, importe con letra, dirección del QR y cadena del complemento), y `Comprobante.Pdf` solo dibuja ese registro.
+- **API:** `POST /api/representaciones/pdf` (sección 8), con una cubeta propia en `Limites:Solicitudes` (`Pdf`, 10 por minuto: dibujar cuesta más que validar) y los mismos 400, 413, 415 y 429 de las demás rutas.
+- **Logo del emisor:** solo PNG o JPEG, con las comprobaciones de la sección 10. No se guarda: viaja en la solicitud y se descarta. Sin logo, sale el del proyecto.
+- **Cuándo se ofrece:** «Descargar PDF» va junto a «Descargar XML» en Generar (el XML recién sellado ya pasó el validador) y, en Validar, solo si el reporte no trae errores.
+- **El PDF en sí:** idioma `es-MX`, título y asunto en los metadatos (que también dicen «sin validez fiscal» cuando no hay timbre) y PDF etiquetado si la biblioteca lo permite.
+
+- [x] Boceto de la plantilla con el logo de Comprobante en `docs/plantilla-pdf/`, para aprobar el diseño antes de programar.
+- [ ] Confirmar la biblioteca: QuestPDF con `SkiaSharp.NativeAssets.Linux.NoDependencies` pide un PDF de una página a la API dentro del contenedor, sin instalar nada más; si falla, plan B.
+- [ ] `ImporteConLetra` en `Comprobante.Core` (pesos y otras monedas, «UN MILLÓN DE PESOS…», «CIEN» y «CIENTO UN», centavos redondeados).
+- [ ] `RepresentacionImpresa` y `ConstructorDeRepresentacion`: del CFDI leído y de los catálogos al registro de impresión, con la dirección del QR y la cadena del complemento; con `TimbreFiscalDigital` toma sus datos y sin él arma el modo «sin timbre».
+- [ ] `Comprobante.Pdf`: la plantilla (encabezado, emisor y receptor, datos, conceptos con encabezado repetido, totales, resumen de impuestos, sellos y pie), el QR, la marca de agua y las fuentes incrustadas.
+- [ ] `POST /api/representaciones/pdf` con sus límites, la cubeta `Pdf` y la validación del logo.
+- [ ] Angular: «Descargar PDF» en Generar y en Validar, con el cuadro de opciones (logo con vista previa y cadena original) y el manejo de errores.
+- [ ] Pruebas (sección 11): importe con letra, constructor, texto y QR del PDF, la API y Vitest.
+- [ ] Revisión a ojo: los PDF de los cinco ejemplos y uno con muchos conceptos (más de una página, con el encabezado repetido), en el visor del navegador y al imprimir en carta.
+- [ ] Prueba de humo en la CI: pedir un PDF a la API en Docker y comprobar que empieza con `%PDF-`.
+
+**Entregable:** desde Generar se descarga el PDF de un CFDI recién sellado, con su marca de «sin validez fiscal», y desde Validar el de un XML con timbre de ejemplo, con un QR que lleva al verificador del SAT; los dos se ven bien en el visor del navegador y al imprimir en carta.
+
+### Fase 7. Cierre para el portafolio
+- [x] README con descripción, capturas, diagrama, decisiones técnicas y cómo actualizar los archivos del SAT (hecho antes de la fase 6; al terminar el PDF se le agrega esa función, la licencia de QuestPDF y las capturas nuevas).
 - [ ] Artículo en el sitio, en `_posts/es` y `_posts/en`, con `repo` en el front matter.
 - [ ] En `_data/projects.yml`, agregar al proyecto `url`, `status: done` y `post`.
 - [ ] Decidir si hay demo pública (sección 14).
@@ -391,7 +446,6 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 ### Extensiones (después del MVP)
 - [ ] Complemento de Pagos 2.0: generar y validar.
 - [ ] CLI: `comprobante validar factura.xml` y `comprobante sellar` con un CSD propio, en la computadora del usuario.
-- [ ] Representación impresa en PDF.
 - [ ] Publicar `Comprobante.Core` en NuGet.
 - [ ] Validar el RFC con la librería del proyecto "Validador de CURP y RFC".
 
@@ -406,7 +460,11 @@ Confirmadas el 21 de noviembre de 2026:
 3. **Tipos de comprobante del MVP:** ingreso y egreso. Traslado y pagos (con el complemento 2.0) quedan como extensión.
 4. **Firma:** en la app, solo con los CSD de prueba del SAT. El CSD propio, solo en la CLI y en la computadora del usuario.
 5. **Catálogos:** PostgreSQL con EF Core, a petición del dueño del proyecto, en lugar de CSV en memoria. Los CSV siguen en el repositorio como fuente y se siembran a la base. Lo que se gana es mostrar modelado, migraciones, índices y pruebas contra una base real; lo que cuesta, un contenedor más.
-6. **Demo pública:** se decide en la fase 6. Mientras tanto se corre con Docker en local. Si se publica, solo con CSD de prueba y con los límites de la sección 10.
+6. **Demo pública:** se decide en la fase 7. Mientras tanto se corre con Docker en local. Si se publica, solo con CSD de prueba y con los límites de la sección 10.
+
+Agregada el 22 de noviembre de 2026:
+
+7. **Representación impresa en PDF:** la pidió el dueño del proyecto como una fase más (la 6; el cierre pasa a la 7), con una plantilla propia a partir de un ejemplo de CFDI y con logo. Propuesta técnica a confirmar al empezar la fase: QuestPDF en `Comprobante.Pdf`, con PDFsharp y MigraDoc como plan B.
 
 ---
 
@@ -418,6 +476,7 @@ Confirmadas el 21 de noviembre de 2026:
 4. Un XML con errores sembrados reporta cada uno con su código de la matriz, el nodo y un mensaje en español.
 5. La API no guarda ni registra el contenido de los XML.
 6. Las pruebas de backend y frontend pasan en GitHub Actions.
+7. Desde la app se descarga la representación impresa en PDF de un CFDI generado (con la plantilla de la fase 6: logo, importe con letra, sellos y la marca de «sin validez fiscal») y la de un XML timbrado, con su código QR de verificación.
 
 ---
 
@@ -434,6 +493,9 @@ Confirmadas el 21 de noviembre de 2026:
 | Carga y consulta de los catálogos grandes | PostgreSQL con índices `pg_trgm`; siembra idempotente con huella y candado; healthcheck con `start_period` para la primera carga (unos 14 s, medida en la fase 1) |
 | Las pruebas de integración y la CI necesitan Docker | Testcontainers levanta un PostgreSQL desechable; GitHub Actions ya trae Docker |
 | Reglas que dependen del padrón del SAT (nombre, régimen y código postal reales del receptor) | Quedan fuera (21 de las 129 reglas) y la app lo explica: valida forma y consistencia, no existencia. `GET /api/validaciones/reglas` las lista con su motivo |
+| La biblioteca de PDF no corre en la imagen de Docker (SkiaSharp usa bibliotecas nativas) o su licencia no encaja | `SkiaSharp.NativeAssets.Linux.NoDependencies`, fuentes incrustadas, una prueba en la imagen real antes de seguir y otra de humo en la CI; la licencia Community de QuestPDF queda en el README; plan B: PDFsharp y MigraDoc (MIT) |
+| Que alguien tome un PDF de prueba por una factura | Franja y marca de agua «Sin validez fiscal» en cada página, `-prueba.pdf` en el nombre del archivo y metadatos del PDF que lo dicen. Con timbre, el PDF no afirma validez: el QR lleva al verificador del SAT |
+| Un logo malicioso o enorme (bomba de descompresión) | Solo PNG y JPEG, tipo comprobado por los primeros bytes, 200 KB y 2000 × 2000 px como máximo, leídos del encabezado antes de decodificar; no se guarda |
 
 ---
 
@@ -453,3 +515,8 @@ Confirmadas el 21 de noviembre de 2026:
 - Los XSLT del SAT se declaran 2.0 pero funcionan con motores 1.0: <https://mintlify.wiki/eclipxe13/CfdiUtils/components/cadena-origen>
 - Ejemplos de CFDI 4.0 con su cadena original verificada (útiles para las pruebas): <https://cryptosys.net/firmasat/cfdv40-examples.html>
 - Versiones de .NET 11 y Angular 22: las mismas fuentes que el plan de Mediateca.
+- Código de barras bidimensional (QR) de la representación impresa, Anexo 20 (rubro I.E; página 67 en la versión de 2022): la dirección del verificador, sus parámetros `id`, `re`, `rr`, `tt` y `fe`, y un ejemplo: <https://cryptosys.net/firmasat/qrcode-for-cfdi.html>
+- El total del QR va a 17 posiciones (10 enteros, el punto y 6 decimales): <https://contadormx.com/que-es-el-codigo-de-barras-bidimensional-en-los-cfdi-impresos-y-donde-se-generan/>
+- Qué debe llevar la representación impresa (la leyenda, los números de serie de los certificados del emisor y del SAT, las fechas de emisión y de certificación y el QR): <https://yo-facturo.com/blog/representacion-impresa-cfdi-mexico/> y <https://sigi.cucei.udg.mx/public-doc/20>
+- Ejemplo de representación gráfica de un CFDI 4.0 en una guía de llenado del propio SAT (Apéndice 4): <https://www.sat.gob.mx/minisitio/Factura/documentos/Guia_llenadoCFDI_DPA.pdf>
+- QuestPDF: quién califica para la licencia Community <https://www.questpdf.com/license/guide.html> y dependencias nativas en Linux <https://www.questpdf.com/going-production/platform-specific-dependencies.html>

@@ -1,0 +1,136 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Boceto de la plantilla del PDF</title><style>
+@page { size: 215.9mm 279.4mm; margin: 0 }
+* { box-sizing: border-box }
+:root { --ink:#1b1733; --ink2:#5d5875; --line:#d9d4e8; --linefuerte:#b9b2d3; --accent:#512bd4; --accent-strong:#3d1fae;
+        --soft:#ede7ff; --band:#f4f2fa }
+html, body { margin:0; background:#fff }
+body { font-family: "Inter", "Atkinson Hyperlegible Next", system-ui, sans-serif; color:var(--ink); font-size:7.9pt; line-height:1.32;
+       -webkit-print-color-adjust: exact; print-color-adjust: exact }
+.hoja { position:relative; width:215.9mm; height:279.4mm; padding:15mm 12mm 9mm; overflow:hidden; background:#fff }
+.hoja > * { position:relative; z-index:1 }
+.franja { position:absolute !important; left:0; right:0; top:0; height:7mm; background:var(--soft); color:var(--accent-strong);
+          font-weight:800; font-size:6.6pt; letter-spacing:.14em; display:flex; align-items:center; justify-content:center; z-index:2 }
+.agua { position:absolute !important; left:50%; top:52%; transform:translate(-50%,-50%) rotate(-33deg); z-index:0 !important; text-align:center;
+        font-weight:800; font-size:62pt; line-height:1.05; letter-spacing:.04em; color:rgba(81,43,212,.07); white-space:nowrap; pointer-events:none }
+.et { display:block; font-size:5.9pt; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--ink2) }
+.mono { font-family:"DejaVu Sans Mono","Atkinson Hyperlegible Mono",ui-monospace,monospace }
+.num { font-variant-numeric: tabular-nums; text-align:right }
+
+.cabecera { display:grid; grid-template-columns: 62mm 1fr 64mm; gap:6mm; align-items:start; margin-bottom:4.5mm }
+.logo { height:20mm; width:60mm; display:flex; align-items:center }
+.logo svg { max-width:100%; max-height:100% }
+.titulo { padding-top:3mm }
+.titulo h1 { margin:0; font-size:23pt; line-height:1; font-weight:800; letter-spacing:.01em; color:var(--accent) }
+.titulo p { margin:1.4mm 0 0; font-size:6.8pt; color:var(--ink2) }
+.folios { display:grid; gap:2mm }
+.caja { border:1px solid var(--linefuerte); border-radius:1.4mm; padding:1.5mm 2.2mm 1.7mm; background:#fff }
+.caja .val { display:block; font-weight:700; font-size:8pt; margin-top:.6mm; word-break:break-all }
+.caja .val.mono { font-size:6.9pt; letter-spacing:-.01em }
+.caja.doble { display:grid; grid-template-columns:1fr auto; gap:5mm }
+.sintimbre { color:var(--accent-strong) }
+
+.partes { display:grid; grid-template-columns:1fr 1fr; gap:3.5mm; margin-bottom:3.5mm }
+.parte { border:1px solid var(--line); border-radius:1.4mm; padding:0 2.6mm 2mm; background:#fff }
+.parte h2 { margin:0 -2.6mm 1.6mm; padding:1.1mm 2.6mm; background:var(--band); border-radius:1.4mm 1.4mm 0 0; font-size:6.4pt; font-weight:800;
+            letter-spacing:.14em; text-transform:uppercase; color:var(--accent-strong) }
+.parte dl { margin:0; display:grid; grid-template-columns:27mm 1fr; row-gap:.9mm; column-gap:2mm }
+.parte dt { font-size:6.1pt; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); padding-top:.5mm }
+.parte dd { margin:0; font-weight:600 }
+.parte dd.nombre { font-weight:800; font-size:8.6pt }
+
+.datos { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.6mm 4mm; margin-bottom:3.4mm }
+.datos div { border-bottom:1px solid var(--line); padding-bottom:1mm; min-height:8.2mm }
+.datos b { display:block; font-weight:600; margin-top:.4mm; overflow-wrap:anywhere }
+.datos .ancho { grid-column: span 2 }
+
+table.conceptos { width:100%; border-collapse:collapse; margin-bottom:3.4mm; table-layout:fixed }
+.conceptos th { background:var(--soft); color:var(--ink); font-size:6.2pt; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+                padding:1.6mm 1.6mm; text-align:left; border-top:1.5px solid var(--accent); vertical-align:bottom }
+.conceptos td { padding:1.7mm 1.6mm 1.5mm; border-bottom:1px solid var(--line); vertical-align:top }
+.conceptos th.r, .conceptos td.r { text-align:right }
+.conceptos td.r { font-variant-numeric: tabular-nums; white-space:nowrap }
+.conceptos .imp { display:block; margin-top:.8mm; font-size:6.2pt; color:var(--ink2) }
+.conceptos .desc b { font-weight:700 }
+
+.resumen { display:grid; grid-template-columns:1fr 66mm; gap:5mm; margin-bottom:3.6mm; align-items:start }
+.letra { border:1px solid var(--line); border-radius:1.4mm; padding:1.5mm 2.6mm 2mm; margin-bottom:2.6mm }
+.letra b { display:block; font-size:8.4pt; font-weight:800; margin-top:.5mm; letter-spacing:.01em }
+.tablas { display:grid; grid-template-columns: 1.7fr 1fr; gap:3mm }
+.tablas table { width:100%; border-collapse:collapse }
+.tablas caption { text-align:left; font-size:6.1pt; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--accent-strong); padding-bottom:1mm }
+.tablas th { background:var(--band); font-size:5.9pt; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:1mm 1.3mm; text-align:left; color:var(--ink2) }
+.tablas td { padding:1mm 1.3mm; border-bottom:1px solid var(--line); font-size:7.2pt }
+.tablas th.r, .tablas td.r { text-align:right; font-variant-numeric: tabular-nums }
+.totales .fila { display:flex; justify-content:space-between; padding:1.1mm 0; border-bottom:1px solid var(--line); font-weight:600 }
+.totales .fila span:first-child { font-size:6.4pt; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); padding-top:.3mm }
+.totales .fila span:last-child { font-variant-numeric: tabular-nums }
+.total { margin:3.4mm 2.4mm 0 0; border:1.6px solid var(--ink); border-radius:2.4mm; padding:2mm 3mm 2.2mm; background:#fff;
+         box-shadow:2.4mm 2.4mm 0 var(--accent); display:flex; justify-content:space-between; align-items:baseline }
+.total span:first-child { font-size:7pt; font-weight:800; letter-spacing:.12em }
+.total span:last-child { font-size:14.5pt; font-weight:800; font-variant-numeric: tabular-nums }
+
+.sellos { display:grid; grid-template-columns:32mm 1fr; gap:4.5mm; align-items:start }
+.qr { width:31mm }
+.qr svg { width:31mm; height:31mm; display:block; outline:1px solid var(--line); outline-offset:-1px }
+.qr .nota { font-size:5.8pt; color:var(--ink2); margin-top:1mm; text-align:center }
+.sintimbre-caja { width:31mm; height:31mm; border:1.5px dashed var(--linefuerte); border-radius:1.4mm; display:flex; flex-direction:column; align-items:center;
+                  justify-content:center; text-align:center; padding:2mm; color:var(--accent-strong); font-weight:800; font-size:7pt; letter-spacing:.05em }
+.sintimbre-caja small { display:block; margin-top:1.2mm; font-weight:500; letter-spacing:0; color:var(--ink2); font-size:5.9pt; line-height:1.3 }
+.cadenas h3 { margin:0 0 .8mm; padding-bottom:.7mm; border-bottom:1px solid var(--ink); font-size:6.3pt; font-weight:800; letter-spacing:.07em; text-transform:uppercase }
+.cadenas p { margin:0 0 2.2mm; font-size:5.2pt; line-height:1.38; word-break:break-all; color:#2a2547 }
+
+.pie { position:absolute !important; left:12mm; right:12mm; bottom:7mm; display:grid; grid-template-columns:1fr auto 1fr; align-items:end; font-size:6.4pt; color:var(--ink2) }
+.pie strong { color:var(--ink); font-size:7.1pt; letter-spacing:.02em }
+.pie .der { text-align:right }
+</style><body><section class="hoja">
+<div class="franja">COMPROBANTE DE PRUEBA · NO TIMBRADO · SIN VALIDEZ FISCAL</div><div class="agua">SIN VALIDEZ<br>FISCAL</div>
+<header class="cabecera">
+  <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 313 64" role="img" aria-label="Comprobante"><rect width="64" height="64" rx="14" fill="#512bd4"/><path d="M24.3720703125 43.283203125C30.10693359375 43.283203125 33.3212890625 39.318359375 33.70361328125 35.5517578125H28.6484375C28.29443359375 37.60498046875 26.73681640625 38.8935546875 24.47119140625 38.8935546875C21.44091796875 38.8935546875 19.5009765625 36.69873046875 19.5009765625 32.46484375C19.5009765625 28.37255859375 21.3984375 26.0078125 24.49951171875 26.0078125C26.76513671875 26.0078125 28.30859375 27.29638671875 28.63427734375 29.349609375H33.689453125C33.10888671875 24.43603515625 29.384765625 21.6181640625 24.3720703125 21.6181640625C18.75048828125 21.6181640625 14.38916015625 25.498046875 14.38916015625 32.46484375C14.38916015625 39.38916015625 18.66552734375 43.283203125 24.3720703125 43.283203125Z M36.4365234375 43.0H41.43505859375V35.3251953125H49.8603515625V31.33203125H41.43505859375V25.9794921875H50.78076171875V21.9013671875H36.4365234375Z" fill="#fff"/><path d="M91.0654296875 44.33203125C97.7890625 44.33203125 101.5576171875 39.68359375 102.005859375 35.267578125H96.0791015625C95.6640625 37.6748046875 93.837890625 39.185546875 91.181640625 39.185546875C87.62890625 39.185546875 85.3544921875 36.6123046875 85.3544921875 31.6484375C85.3544921875 26.8505859375 87.5791015625 24.078125 91.21484375 24.078125C93.87109375 24.078125 95.6806640625 25.5888671875 96.0625 27.99609375H101.9892578125C101.30859375 22.2353515625 96.9423828125 18.931640625 91.0654296875 18.931640625C84.474609375 18.931640625 79.361328125 23.48046875 79.361328125 31.6484375C79.361328125 39.7666015625 84.375 44.33203125 91.0654296875 44.33203125Z M113.8095703125 44.3486328125C119.603515625 44.3486328125 123.123046875 40.4970703125 123.123046875 34.7861328125C123.123046875 29.05859375 119.603515625 25.20703125 113.8095703125 25.20703125C107.9990234375 25.20703125 104.4794921875 29.05859375 104.4794921875 34.7861328125C104.4794921875 40.4970703125 107.9990234375 44.3486328125 113.8095703125 44.3486328125ZM113.8095703125 39.916015625C111.5849609375 39.916015625 110.3896484375 37.8408203125 110.3896484375 34.7529296875C110.3896484375 31.6484375 111.5849609375 29.6396484375 113.8095703125 29.6396484375C116.0341796875 29.6396484375 117.2294921875 31.6484375 117.2294921875 34.7529296875C117.2294921875 37.8408203125 116.0341796875 39.916015625 113.8095703125 39.916015625Z M126.244140625 44.0H132.0380859375V32.9765625C132.0380859375 31.0341796875 133.150390625 29.921875 134.7275390625 29.921875C136.271484375 29.921875 137.3173828125 31.0009765625 137.3173828125 32.7109375V44.0H142.87890625V32.8603515625C142.87890625 31.083984375 143.8916015625 29.921875 145.53515625 29.921875C147.0625 29.921875 148.1416015625 30.91796875 148.1416015625 32.7939453125V44.0H153.935546875V31.482421875C153.935546875 27.564453125 151.4619140625 25.1904296875 147.9921875 25.1904296875C145.4853515625 25.1904296875 143.0947265625 26.4521484375 141.9658203125 29.490234375C141.052734375 26.4521484375 139.5419921875 25.1904296875 137.1845703125 25.1904296875C134.943359375 25.1904296875 132.8681640625 26.3359375 131.8388671875 29.125L131.5732421875 25.439453125H126.244140625Z M157.7705078125 50.939453125H163.564453125V40.9951171875H163.697265625C164.427734375 42.671875 166.0712890625 44.265625 168.91015625 44.265625C173.02734375 44.265625 176.34765625 41.0283203125 176.34765625 34.736328125C176.34765625 28.228515625 172.8447265625 25.20703125 168.943359375 25.20703125C165.98828125 25.20703125 164.39453125 26.9501953125 163.697265625 28.626953125H163.498046875V25.439453125H157.7705078125ZM166.9345703125 39.75C164.7265625 39.75 163.431640625 37.7744140625 163.431640625 34.736328125C163.431640625 31.6650390625 164.7265625 29.7392578125 166.9345703125 29.7392578125C169.17578125 29.7392578125 170.3876953125 31.71484375 170.3876953125 34.736328125C170.3876953125 37.7578125 169.1591796875 39.75 166.9345703125 39.75Z M179.4521484375 44.0H185.24609375V33.873046875C185.24609375 31.6484375 186.8232421875 30.154296875 188.96484375 30.154296875C189.662109375 30.154296875 190.7080078125 30.2705078125 191.255859375 30.453125V25.40625C190.7744140625 25.2900390625 190.16015625 25.20703125 189.6123046875 25.20703125C187.5703125 25.20703125 185.943359375 26.3857421875 185.279296875 28.826171875H185.080078125V25.439453125H179.4521484375Z M202.345703125 44.3486328125C208.1396484375 44.3486328125 211.6591796875 40.4970703125 211.6591796875 34.7861328125C211.6591796875 29.05859375 208.1396484375 25.20703125 202.345703125 25.20703125C196.53515625 25.20703125 193.015625 29.05859375 193.015625 34.7861328125C193.015625 40.4970703125 196.53515625 44.3486328125 202.345703125 44.3486328125ZM202.345703125 39.916015625C200.12109375 39.916015625 198.92578125 37.8408203125 198.92578125 34.7529296875C198.92578125 31.6484375 200.12109375 29.6396484375 202.345703125 29.6396484375C204.5703125 29.6396484375 205.765625 31.6484375 205.765625 34.7529296875C205.765625 37.8408203125 204.5703125 39.916015625 202.345703125 39.916015625Z M225.919921875 44.265625C230.037109375 44.265625 233.357421875 41.0283203125 233.357421875 34.736328125C233.357421875 28.228515625 229.8544921875 25.20703125 225.953125 25.20703125C222.998046875 25.20703125 221.404296875 26.9501953125 220.70703125 28.626953125H220.57421875V19.263671875H214.7802734375V44.0H220.5078125V40.9951171875H220.70703125C221.4375 42.671875 223.0810546875 44.265625 225.919921875 44.265625ZM223.9443359375 39.75C221.736328125 39.75 220.44140625 37.7744140625 220.44140625 34.736328125C220.44140625 31.6650390625 221.736328125 29.7392578125 223.9443359375 29.7392578125C226.185546875 29.7392578125 227.3974609375 31.71484375 227.3974609375 34.736328125C227.3974609375 37.7578125 226.1689453125 39.75 223.9443359375 39.75Z M241.658203125 44.33203125C244.2314453125 44.33203125 246.0244140625 43.302734375 247.037109375 41.3935546875H247.1865234375V44.0H252.6318359375V31.3994140625C252.6318359375 27.4150390625 248.99609375 25.20703125 244.380859375 25.20703125C239.732421875 25.20703125 236.810546875 27.3818359375 236.080078125 30.552734375L241.326171875 31.2333984375C241.6416015625 30.0712890625 242.720703125 29.32421875 244.3310546875 29.32421875C245.908203125 29.32421875 246.8544921875 30.0546875 246.8544921875 31.3330078125V31.3994140625C246.8544921875 32.544921875 245.5927734375 32.77734375 242.455078125 33.04296875C238.703125 33.3583984375 235.548828125 34.736328125 235.548828125 38.853515625C235.548828125 42.5224609375 238.0888671875 44.33203125 241.658203125 44.33203125ZM243.41796875 40.4970703125C242.0234375 40.4970703125 241.02734375 39.8330078125 241.02734375 38.587890625C241.02734375 37.359375 241.990234375 36.62890625 243.7001953125 36.3798828125C244.779296875 36.2138671875 246.240234375 35.96484375 246.904296875 35.6162109375V37.392578125C246.904296875 39.21875 245.3603515625 40.4970703125 243.41796875 40.4970703125Z M262.2607421875 33.408203125C262.2607421875 31.25 263.5390625 29.9716796875 265.431640625 29.9716796875C267.32421875 29.9716796875 268.453125 31.216796875 268.453125 33.30859375V44.0H274.2470703125V32.1796875C274.2470703125 27.9794921875 271.70703125 25.20703125 267.822265625 25.20703125C264.8173828125 25.20703125 262.9912109375 26.8671875 262.01171875 29.4404296875L261.912109375 25.439453125H256.466796875V44.0H262.2607421875Z M288.076171875 25.439453125H284.7392578125V21.0234375H278.9453125V25.439453125H276.48828125V29.7392578125H278.9453125V38.8369140625C278.9453125 42.373046875 281.0205078125 44.265625 284.955078125 44.265625C286.05078125 44.265625 287.279296875 44.1494140625 288.57421875 43.7841796875L287.8271484375 39.5673828125C287.51171875 39.650390625 286.615234375 39.7666015625 286.216796875 39.7666015625C285.1708984375 39.7666015625 284.7392578125 39.3017578125 284.7392578125 38.322265625V29.7392578125H288.076171875Z M299.697265625 44.3486328125C304.1962890625 44.3486328125 307.234375 42.306640625 308.1640625 39.0859375L303.0009765625 38.2392578125C302.5361328125 39.484375 301.357421875 40.1484375 299.796875 40.1484375C297.60546875 40.1484375 296.1279296875 38.8203125 296.0283203125 36.130859375H308.4296875V34.669921875C308.4296875 28.5439453125 304.6943359375 25.20703125 299.4814453125 25.20703125C293.9033203125 25.20703125 290.333984375 29.05859375 290.333984375 34.7861328125C290.333984375 40.7294921875 293.8701171875 44.3486328125 299.697265625 44.3486328125ZM296.0615234375 32.7607421875C296.27734375 30.71875 297.4892578125 29.4072265625 299.53125 29.4072265625C301.556640625 29.4072265625 302.7021484375 30.65234375 302.9345703125 32.7607421875Z" fill="#1b1733"/></svg></div>
+  <div class="titulo"><h1>FACTURA</h1><p>Comprobante fiscal digital por Internet</p></div>
+  <div class="folios">
+    <div class="caja"><span class="et">Folio fiscal (UUID)</span><span class="val sintimbre">SIN TIMBRAR</span></div>
+    <div class="caja doble"><div><span class="et">Serie-Folio</span><span class="val">H-2026-0042</span></div><div><span class="et">Versión</span><span class="val">4.0</span></div></div>
+  </div>
+</header>
+<div class="partes">
+  <article class="parte"><h2>Emisor</h2><dl>
+    <dt>Nombre</dt><dd class="nombre">MARIA WATEMBER TORRES</dd>
+    <dt>RFC</dt><dd class="mono">WATM640917J45</dd>
+    <dt>Régimen fiscal</dt><dd>612 - Personas Físicas con Actividades Empresariales y Profesionales</dd>
+    <dt>Lugar de expedición</dt><dd>43543</dd></dl></article>
+  <article class="parte"><h2>Receptor</h2><dl>
+    <dt>Nombre</dt><dd class="nombre">ESCUELA KEMPER URGATE</dd>
+    <dt>RFC</dt><dd class="mono">EKU9003173C9</dd>
+    <dt>Uso del CFDI</dt><dd>G03 - Gastos en general</dd>
+    <dt>Régimen fiscal</dt><dd>601 - General de Ley Personas Morales</dd>
+    <dt>Domicilio fiscal</dt><dd>42501</dd></dl></article>
+</div>
+<div class="datos"><div><span class="et">Fecha y hora de emisión</span><b>2026-11-19T12:00:00</b></div><div><span class="et">Tipo de comprobante</span><b>I - Ingreso</b></div><div><span class="et">Exportación</span><b>01 - No aplica</b></div><div><span class="et">Moneda</span><b>MXN - Peso Mexicano</b></div><div><span class="et">Tipo de cambio</span><b>—</b></div><div><span class="et">Forma de pago</span><b>03 - Transferencia electrónica de fondos</b></div><div><span class="et">Método de pago</span><b>PUE - Pago en una sola exhibición</b></div><div><span class="et">Condiciones de pago</span><b>Contado</b></div><div><span class="et">No. de serie del certificado del emisor</span><b>30001000000500003362</b></div></div>
+<table class="conceptos">
+  <colgroup><col style="width:20mm"><col style="width:30mm"><col style="width:13mm"><col><col style="width:21mm"><col style="width:16mm"><col style="width:11mm"><col style="width:22mm"></colgroup>
+  <thead><tr><th>Clave prod. serv.</th><th>Unidad</th><th class="r">Cant.</th><th>Descripción</th><th class="r">Valor unitario</th><th class="r">Descuento</th><th class="r">Obj. imp.</th><th class="r">Importe</th></tr></thead>
+  <tbody><tr><td class="mono">80101500</td><td>HUR · Hora</td><td class="r">10.00</td><td class="desc">Asesoría en administración corporativa<span class="imp">Traslado IVA 16.00 %: $1,344.00 · Retención ISR 10.00 %: $840.00 · Retención IVA 10.6667 %: $896.00</span></td><td class="r">850.00</td><td class="r">100.00</td><td class="r">02</td><td class="r">8,500.00</td></tr><tr><td class="mono">81111500</td><td>E48 · Unidad de servicio</td><td class="r">1.00</td><td class="desc"><b>SW-01</b> · Configuración de software<span class="imp">Traslado IVA 0.00 %: $0.00</span></td><td class="r">2,500.50</td><td class="r">—</td><td class="r">02</td><td class="r">2,500.50</td></tr><tr><td class="mono">43231500</td><td>H87 · Pieza</td><td class="r">2.00</td><td class="desc">Manual impreso<span class="imp">Traslado IVA: exento</span></td><td class="r">99.99</td><td class="r">—</td><td class="r">02</td><td class="r">199.98</td></tr></tbody>
+</table>
+<div class="resumen">
+  <div>
+    <div class="letra"><span class="et">Importe con letra</span><b>DIEZ MIL SETECIENTOS OCHO PESOS 48/100 M.N.</b></div>
+    <div class="tablas">
+      <table><caption>Impuestos trasladados</caption><thead><tr><th class="r">Base</th><th>Impuesto</th><th>Factor</th><th class="r">Tasa o cuota</th><th class="r">Importe</th></tr></thead><tbody>
+        <tr><td class="r">2,500.50</td><td>002 IVA</td><td>Tasa</td><td class="r">0.000000</td><td class="r">$0.00</td></tr>
+        <tr><td class="r">8,400.00</td><td>002 IVA</td><td>Tasa</td><td class="r">0.160000</td><td class="r">$1,344.00</td></tr>
+        <tr><td class="r">199.98</td><td>002 IVA</td><td>Exento</td><td class="r">—</td><td class="r">—</td></tr></tbody></table>
+      <table><caption>Impuestos retenidos</caption><thead><tr><th>Impuesto</th><th class="r">Importe</th></tr></thead><tbody>
+        <tr><td>001 ISR</td><td class="r">$840.00</td></tr><tr><td>002 IVA</td><td class="r">$896.00</td></tr></tbody></table>
+    </div>
+  </div>
+  <div class="totales">
+    <div class="fila"><span>Subtotal</span><span>$11,200.48</span></div>
+    <div class="fila"><span>Descuento</span><span>$100.00</span></div>
+    <div class="fila"><span>Impuestos trasladados</span><span>$1,344.00</span></div>
+    <div class="fila"><span>Impuestos retenidos</span><span>$1,736.00</span></div>
+    <div class="total"><span>TOTAL</span><span>$10,708.48</span></div>
+  </div>
+</div>
+<div class="sellos"><div class="sintimbre-caja">SIN TIMBRE<small>Este CFDI no se timbró: no existe en el SAT y no tiene código de verificación.</small></div><div class="cadenas"><h3>Cadena original del comprobante</h3><p class="mono">||4.0|H|2026-0042|2026-11-19T12:00:00|03|30001000000500003362|Contado|11200.48|100.00|MXN|10708.48|I|01|PUE|43543|WATM640917J45|MARIA WATEMBER TORRES|612|EKU9003173C9|ESCUELA KEMPER URGATE|42501|601|G03|80101500|10|HUR|Hora|Asesoría en administración corporativa|850.00|8500.00|100.00|02|8400.00|002|Tasa|0.160000|1344.00|8400.00|001|Tasa|0.100000|840.00|8400.00|002|Tasa|0.106667|896.0028|81111500|SW-01|1|E48|Unidad de servicio|Configuración de software|2500.50|2500.50|02|2500.50|002|Tasa|0.000000|0.00|43231500|2|H87|Pieza|Manual impreso|99.99|199.98|02|199.98|002|Exento|001|840.00|002|896.00|1736.00|2500.50|002|Tasa|0.000000|0.00|8400.00|002|Tasa|0.160000|1344.00|199.98|002|Exento|1344.00||</p><h3>Sello digital del emisor</h3><p class="mono">sBdlENQMdNxcQNgv9X9MTndgMe8kc/je14l2/foXfEXbiUHxRja+VhfkaIeIEQWKLd9krWCH53VyuFIo40TCwg5M7FS/TvVB/IZgd/4LCJBw/DQ1EOZohyLc4ntxQH9ixUhOAtvvUbGKhvhsSe8jCoJln2m7eYyGG+UBWh3A3ChHWgtXH1tA2sHN70ySi7MmHqKwDgcNAVH2G+r5RmKgEMN5iSq2fcK2f7pfLP8XSyeb5/+TxdlCi93bGZum4KGpd5tBLEO39PbmgwYoVEXukWaEkTo3ZRRn4wknQTA/mgG9y5XakO+ZH8f1EGsSGjFYRcOacjlSdcjESEKgAhG2/Q==</p></div></div>
+<footer class="pie"><div>Generado con Comprobante</div><strong>ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI</strong><div class="der">Página 1 de 1</div></footer>
+</section></body></html>
