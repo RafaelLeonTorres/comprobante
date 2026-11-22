@@ -1,5 +1,6 @@
 # En cada pull request y en cada push a main: compila y prueba el backend y el frontend, y levanta los tres
-# contenedores para comprobar que la app responde a través de nginx.
+# contenedores para comprobar que la app responde a través de nginx y que nginx pone las cabeceras de seguridad, la CSP
+# y los límites de solicitudes y de tamaño.
 name: CI
 
 on:
@@ -59,6 +60,28 @@ jobs:
         run: |
           curl -fsS http://localhost:8081/api/health
           curl -fsS http://localhost:8081/api/catalogos | grep -q '"clave-prod-serv"'
+      - name: Probar las cabeceras y los límites de nginx
+        run: |
+          set -euo pipefail
+          cd "$(mktemp -d)"
+          # La app web lleva la CSP; todo lo que sirve nginx, las cabeceras de seguridad.
+          curl -fsS -D web.txt -o /dev/null http://localhost:8081/
+          grep -qi "^content-security-policy: .*script-src 'self'" web.txt
+          grep -qi '^x-content-type-options: nosniff' web.txt
+          curl -fsS -D api.txt -o /dev/null http://localhost:8081/api/health
+          grep -qi '^x-content-type-options: nosniff' api.txt
+          if grep -qi '^server: kestrel' api.txt; then echo 'La API no debe decir qué servidor es'; exit 1; fi
+          # Un cuerpo de más de 3 MB lo corta nginx con un 413 en problem+json.
+          head -c 4000000 /dev/zero > grande.bin
+          estado=$(curl -s -o cuerpo.json -w '%{http_code}' -X POST -H 'Content-Type: application/xml' --data-binary @grande.bin http://localhost:8081/api/validaciones || true)
+          test "$estado" = 413
+          grep -q 'demasiado grande' cuerpo.json
+          # Una ráfaga de solicitudes: pasado el cupo de nginx contesta 429 en problem+json, y antes de él todo sigue funcionando.
+          lineas=$(curl -s --parallel --parallel-max 60 -o /dev/null -w '%{http_code} %{content_type}\n' 'http://localhost:8081/api/catalogos/?n=[1-150]')
+          echo "$lineas" | tr -d '\r' | sort | uniq -c
+          echo "$lineas" | tr -d '\r' | grep -qx '429 application/problem+json'
+          echo "$lineas" | tr -d '\r' | grep -qx '200 application/json; charset=utf-8'
+          echo 'cabeceras y límites: bien'
       - name: Ver los logs
         if: failure()
         run: docker compose logs

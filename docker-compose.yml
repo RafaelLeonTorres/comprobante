@@ -84,6 +84,8 @@ services:
           path: ./frontend/package.json
         - action: rebuild
           path: ./frontend/nginx.conf
+        - action: rebuild
+          path: ./frontend/nginx-cabeceras.conf
 
 volumes:
   pgdata:

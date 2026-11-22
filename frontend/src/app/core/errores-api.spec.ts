@@ -49,6 +49,38 @@ describe('aErrorApi', () => {
     expect(error.detalle).toContain('Espera');
   });
 
+  it('un 429 con el detalle de la API lo muestra tal cual, con cuánto esperar', () => {
+    const detalle = 'Hiciste demasiadas solicitudes en poco tiempo. Espera 17 segundos e inténtalo de nuevo.';
+    const error = aErrorApi(respuesta(429, { title: 'Demasiadas solicitudes', detail: detalle }));
+
+    expect(error.estado).toBe(429);
+    expect(error.titulo).toBe('Demasiadas solicitudes');
+    expect(error.detalle).toBe(detalle);
+    expect(error.totalDeCampos).toBe(0);
+  });
+
+  it('un 429 de nginx, con su problem+json, también se explica', () => {
+    const error = aErrorApi(
+      respuesta(429, {
+        title: 'Demasiadas solicitudes',
+        status: 429,
+        detail: 'Hiciste demasiadas solicitudes en poco tiempo. Espera un segundo e inténtalo de nuevo.',
+      }),
+    );
+
+    expect(error.detalle).toContain('Espera un segundo');
+  });
+
+  it('un 413 de nginx, con su problem+json, conserva el motivo', () => {
+    const error = aErrorApi(
+      respuesta(413, { title: 'El contenido es demasiado grande', status: 413, detail: 'Lo que enviaste pesa más de lo que acepta la API.' }),
+    );
+
+    expect(error.estado).toBe(413);
+    expect(error.titulo).toBe('El contenido es demasiado grande');
+    expect(error.detalle).toContain('pesa más');
+  });
+
   it('un 500 aclara que no es culpa de los datos, aunque no traiga cuerpo', () => {
     const error = aErrorApi(respuesta(502, '<html>Bad Gateway</html>'));
 

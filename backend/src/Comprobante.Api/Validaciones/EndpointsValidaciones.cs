@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
+using Comprobante.Api.Seguridad;
 using Comprobante.Catalogos;
 using Comprobante.Core.Validacion;
 using Comprobante.Core.Xml;
@@ -28,14 +29,18 @@ internal static class EndpointsValidaciones
             .Produces<ReporteValidacion>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status413PayloadTooLarge)
-            .ProducesProblem(StatusCodes.Status415UnsupportedMediaType);
+            .ProducesProblem(StatusCodes.Status415UnsupportedMediaType)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Validar);
 
         grupo.MapGet("/reglas", ListarReglas)
             .WithSummary("Lista las 129 reglas de la matriz de errores del SAT y cuáles revisa esta app.")
             .WithDescription(
                 "Cada regla trae su código, el nodo y el atributo, la descripción del SAT y su estado: revisada, parcial (se revisa "
                 + "una parte, la nota dice cuál) o no revisada (la nota dice por qué no se puede sin conexión).")
-            .Produces<CoberturaDeReglas>();
+            .Produces<CoberturaDeReglas>()
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Consultar);
     }
 
     private static async Task<IResult> ValidarAsync(

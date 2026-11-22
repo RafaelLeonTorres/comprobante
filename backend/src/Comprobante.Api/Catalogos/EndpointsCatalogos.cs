@@ -1,3 +1,4 @@
+using Comprobante.Api.Seguridad;
 using Comprobante.Catalogos;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,10 +13,14 @@ internal static class EndpointsCatalogos
         var grupo = rutas.MapGroup("/api/catalogos").WithTags("Catálogos del SAT");
 
         grupo.MapGet("/", ListarAsync)
-            .WithSummary("Lista los catálogos del SAT con su número de filas y la versión cargada.");
+            .WithSummary("Lista los catálogos del SAT con su número de filas y la versión cargada.")
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Consultar);
 
         grupo.MapGet("/{nombre}", ConsultarAsync)
-            .WithSummary("Consulta un catálogo con búsqueda por texto y paginación.");
+            .WithSummary("Consulta un catálogo con búsqueda por texto y paginación.")
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Consultar);
     }
 
     private static async Task<IResult> ListarAsync(IDbContextFactory<CatalogosDbContext> fabrica, CancellationToken cancelacion)

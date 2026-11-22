@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Comprobante.Catalogos\Comprobante.Catalogos.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Comprobante.IntegrationTests" />
+  </ItemGroup>
+
 </Project>

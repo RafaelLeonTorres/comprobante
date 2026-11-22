@@ -1,3 +1,4 @@
+using Comprobante.Api.Seguridad;
 using Comprobante.Core.Calculo;
 using Comprobante.Core.Generacion;
 using Comprobante.Core.Sello;
@@ -18,7 +19,10 @@ internal static class EndpointsComprobantes
                 + "totales, con los redondeos del Anexo 20: cada concepto con hasta seis decimales y el redondeo al final, a los "
                 + "decimales de la moneda. No guarda nada. Si hay datos que impiden calcular, responde 400 con los errores por campo.")
             .Produces<ResultadoCalculo>()
-            .ProducesValidationProblem();
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status413PayloadTooLarge)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Calcular);
 
         grupo.MapPost("/", GenerarAsync)
             .WithSummary("Arma, sella y revisa un CFDI 4.0 de ingreso o de egreso, sin timbrarlo.")
@@ -28,7 +32,10 @@ internal static class EndpointsComprobantes
                 + "validación del XML generado. El XML no está timbrado: no tiene validez fiscal. Que el reporte traiga hallazgos "
                 + "no es un error de la solicitud; solo se responde 400 cuando falta algo para poder armarlo.")
             .Produces<ResultadoGeneracion>()
-            .ProducesValidationProblem();
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status413PayloadTooLarge)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Generar);
 
         rutas.MapGet("/api/emisores-prueba", ListarEmisoresDePrueba)
             .WithTags("Comprobantes")
@@ -37,7 +44,9 @@ internal static class EndpointsComprobantes
                 "Son diez certificados públicos que el SAT publica para probar el timbrado. De cada uno se devuelve el RFC, el "
                 + "nombre, el código postal y el régimen fiscal registrados para ese RFC, el número de certificado y su vigencia. "
                 + "La llave privada y su contraseña no se exponen por la API.")
-            .Produces<IReadOnlyList<EmisorDePruebaDto>>();
+            .Produces<IReadOnlyList<EmisorDePruebaDto>>()
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(LimiteDeSolicitudes.Consultar);
     }
 
     private static async Task<IResult> CalcularAsync(

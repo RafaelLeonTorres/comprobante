@@ -13,4 +13,5 @@ RUN npx ng build
 
 FROM nginx:stable-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx-cabeceras.conf /etc/nginx/snippets/cabeceras.conf
 COPY --from=build /app/dist/comprobante-web/browser /usr/share/nginx/html

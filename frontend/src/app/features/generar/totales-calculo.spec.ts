@@ -100,6 +100,13 @@ describe('TotalesCalculo', () => {
     expect(sinCampos.limpio(sinCampos.elemento.querySelector('.aviso'))).toBe('Todavía no se pueden calcular los totales. Intenta de nuevo.');
   });
 
+  it('con un 429 dice cuánto esperar', () => {
+    const detalle = 'Hiciste demasiadas solicitudes en poco tiempo. Espera 12 segundos e inténtalo de nuevo.';
+    const { elemento, limpio } = pintar('error', CALCULO, new ErrorApi(429, 'Demasiadas solicitudes', detalle));
+
+    expect(limpio(elemento.querySelector('.aviso'))).toBe(`Todavía no se pueden calcular los totales. ${detalle}`);
+  });
+
   it('anuncia los cambios a quien usa lector de pantalla sin interrumpirlo', () => {
     const { elemento } = pintar('listo', CALCULO);
 

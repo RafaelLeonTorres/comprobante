@@ -22,6 +22,16 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         // Sin el SQL de cada consulta en la salida de las pruebas.
         builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore", "Warning");
+
+        // Todas las pruebas comparten una API (y una IP): con los límites de solicitudes de verdad, las últimas se toparían
+        // con el 429. SeguridadApiTests los baja en su propia copia de la API.
+        foreach (var cubeta in new[] { "Generar", "Validar", "Calcular", "Consultar", "Global" })
+        {
+            builder.UseSetting($"Limites:Solicitudes:{cubeta}", "1000000");
+        }
+
+        // Como cuando nginx está delante: la IP del cliente sale de X-Forwarded-For, y una prueba puede simular varias.
+        builder.UseSetting("FORWARDEDHEADERS_ENABLED", "true");
     }
 
     public Task InitializeAsync() => _postgres.StartAsync();
