@@ -19,6 +19,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <a matButton routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">
           Inicio
         </a>
+        <a matButton routerLink="/generar" routerLinkActive="activo">Generar</a>
+        <a matButton routerLink="/validar" routerLinkActive="activo">Validar</a>
+        <a matButton routerLink="/catalogos" routerLinkActive="activo">Catálogos</a>
       </nav>
     </header>
 
@@ -28,7 +31,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
     <footer class="pie">
       <p>Sin validez fiscal: esta app no timbra ni envía nada al SAT ni a un PAC.</p>
-      <a href="https://github.com/RafaelLeonTorres/comprobante" target="_blank" rel="noopener noreferrer">
+      <a
+        href="https://github.com/RafaelLeonTorres/comprobante"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Código en GitHub (se abre en otra pestaña)"
+      >
         Código en GitHub
       </a>
     </footer>
@@ -98,7 +106,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         margin: 0;
       }
 
+      /* El relleno da un blanco de pulsación de al menos 24 px de alto (WCAG 2.5.8). */
       a {
+        display: inline-block;
+        padding-block: 4px;
         color: inherit;
       }
     }

@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
 
 import { registrarIconos } from '../../core/iconos';
 import { provideIdioma } from '../../core/idioma';
@@ -12,7 +13,7 @@ describe('Inicio', () => {
   function pintar() {
     TestBed.configureTestingModule({
       imports: [Inicio],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideIdioma()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideIdioma(), provideRouter([])],
     });
     registrarIconos(TestBed.inject(MatIconRegistry), TestBed.inject(DomSanitizer));
     const fixture = TestBed.createComponent(Inicio);
@@ -33,6 +34,15 @@ describe('Inicio', () => {
 
     expect(elemento.querySelector('h1')!.textContent).toContain('CFDI 4.0');
     expect(elemento.querySelector('[role="note"]')!.textContent).toContain('Sin validez fiscal');
+  });
+
+  it('ofrece los tres caminos: generar, validar y consultar los catálogos', () => {
+    const { elemento } = pintar();
+
+    const caminos = [...elemento.querySelectorAll<HTMLAnchorElement>('.caminos a')];
+    expect(caminos.map((a) => a.getAttribute('href'))).toEqual(['/generar', '/validar', '/catalogos']);
+    expect(caminos.map((a) => a.querySelector('.titulo')!.textContent)).toEqual(['Generar un CFDI', 'Validar un XML', 'Consultar los catálogos']);
+    expect(elemento.querySelector('.caminos')!.getAttribute('aria-labelledby')).toBe('caminos-titulo');
   });
 
   it('mientras pregunta a la API dice que está comprobando', () => {

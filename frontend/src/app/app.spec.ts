@@ -29,6 +29,16 @@ describe('App', () => {
     expect(elemento.querySelector('router-outlet')).not.toBeNull();
   });
 
+  it('el enlace al código se abre en otra pestaña sin dar acceso a esta ventana y lo avisa', () => {
+    const enlace = pintar().querySelector<HTMLAnchorElement>('.pie a')!;
+
+    expect(enlace.target).toBe('_blank');
+    expect(enlace.rel).toContain('noopener');
+    // El nombre accesible conserva el texto visible y suma el aviso.
+    expect(enlace.getAttribute('aria-label')).toContain(enlace.textContent!.trim());
+    expect(enlace.getAttribute('aria-label')).toContain('otra pestaña');
+  });
+
   it('el enlace de saltar al contenido mueve el foco al contenido principal', () => {
     const elemento = pintar();
     const principal = elemento.querySelector<HTMLElement>('main#contenido')!;

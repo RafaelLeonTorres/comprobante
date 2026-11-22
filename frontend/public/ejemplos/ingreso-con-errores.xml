@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="H" Folio="2026-0042" Fecha="2026-11-19T12:00:00" Sello="sBdlENQMdNxcQNgv9X9MTndgMe8kc/je14l2/foXfEXbiUHxRja+VhfkaIeIEQWKLd9krWCH53VyuFIo40TCwg5M7FS/TvVB/IZgd/4LCJBw/DQ1EOZohyLc4ntxQH9ixUhOAtvvUbGKhvhsSe8jCoJln2m7eYyGG+UBWh3A3ChHWgtXH1tA2sHN70ySi7MmHqKwDgcNAVH2G+r5RmKgEMN5iSq2fcK2f7pfLP8XSyeb5/+TxdlCi93bGZum4KGpd5tBLEO39PbmgwYoVEXukWaEkTo3ZRRn4wknQTA/mgG9y5XakO+ZH8f1EGsSGjFYRcOacjlSdcjESEKgAhG2/Q==" FormaPago="03" NoCertificado="30001000000500003362" Certificado="MIIFgzCCA2ugAwIBAgIUMzAwMDEwMDAwMDA1MDAwMDMzNjIwDQYJKoZIhvcNAQELBQAwggErMQ8wDQYDVQQDDAZBQyBVQVQxLjAsBgNVBAoMJVNFUlZJQ0lPIERFIEFETUlOSVNUUkFDSU9OIFRSSUJVVEFSSUExGjAYBgNVBAsMEVNBVC1JRVMgQXV0aG9yaXR5MSgwJgYJKoZIhvcNAQkBFhlvc2Nhci5tYXJ0aW5lekBzYXQuZ29iLm14MR0wGwYDVQQJDBQzcmEgY2VycmFkYSBkZSBjYWxpejEOMAwGA1UEEQwFMDYzNzAxCzAJBgNVBAYTAk1YMRkwFwYDVQQIDBBDSVVEQUQgREUgTUVYSUNPMREwDwYDVQQHDAhDT1lPQUNBTjERMA8GA1UELRMIMi41LjQuNDUxJTAjBgkqhkiG9w0BCQITFnJlc3BvbnNhYmxlOiBBQ0RNQS1TQVQwHhcNMjMwNTE1MTY1NzU3WhcNMjcwNTE1MTY1NzU3WjCBqjEeMBwGA1UEAxMVTUFSSUEgV0FURU1CRVIgVE9SUkVTMR4wHAYDVQQpExVNQVJJQSBXQVRFTUJFUiBUT1JSRVMxHjAcBgNVBAoTFU1BUklBIFdBVEVNQkVSIFRPUlJFUzEWMBQGA1UELRMNV0FUTTY0MDkxN0o0NTEbMBkGA1UEBRMSV0FUTTY0MDkxN01IR1RSUjAxMRMwEQYDVQQLEwpTdWN1cnNhbCAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAueKA188y59jth2cxGI3IRAwKXA77p7bOOli5hb5Jsv3GdWdnrjg+hldmCnfV5OnfAj/oGKkD8UcpIEir1Yk9iz1CYN+p7uSndp0cwp6ExsCYY9GRC0FWPNY/ZXwc/CHOKW3Y2iXlWJDBfyhLCKC+4oTkBzp+2KmjRNIVdsJoVvZH/KSs6U7j+coos9ygrbvQk+i1UrC5L0/JhTA44Rp2l4Kj9sVhz1PUqA+Lq9rLMkvsDBC6NS3NlLhPsJ+4c5PlLTikc3LcLZVtBp/rz20pct+AAskGwDZe8/HVRecehb71pDaPCdHyj6j3Z3NJIArxLm6ecZZguWaSrA1LuSSOnQIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkqhkiG9w0BAQsFAAOCAgEAdu2JXVqSJ/0nLLFIq+3bodv9dHgR8RraMTrMugBToKut69OEZ2+59rUzaYEOyfCnkoOcrpRikTH80QNvYyu4n2PaGuf6labBGloR8rkWgql96vB+xKTzhdF/kc9DwEYIWZgGAeamZ3X4CofJs10oYBUDCSdwOt4PPb9mDB7pKw6yH0M/OqLOFVCC7BAk4ER4pcuj5T/xBMLFcb09/cvUg/+/jETjHHrnS+BuBzXTvCUtLHBr6IOOmWAr8B8Onmph7FrJY/2lmZMLlGVY0POUa/4i+M8wntvfXxlyUoYc+5g4ZAdj2b6oj3gh2dDldkwV6K0ekPSChVcKqPgjsL9y7RfT+1miEwbEf+W5OeKE67MQoEtScJ7vuXXP1Gz/juUMyQY+BC/n2UmiLCTqAoXYybyTKiK1gV9Ymmxk1/LZUq6fvOuZoyOSgC0znlGg874BAwQ65WJwq34IOsN0grCC/pVPbLJpUUp9ZzDMMqAk6yC7UDHacQI7hO4b7TKn7vz150vp2ZJzjFwP3zUKBlF+VmWsMmpiINfguo/owVR4NYzy5RaZLkXbuiomU74VIsJySpo8SpUouvmkZjbMDbcsMD1rblXn+sCozz2altEP6DJYANqtbDy9hrWjIwTy0HbXR7Wg1ASz1fmV4YyPBks5otf0DomGmzLSEEHPaBNuDCU=" CondicionesDePago="Contado" SubTotal="11200.48" Descuento="100.00" Moneda="MXN" Total="10709.48" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="43543">
+  <cfdi:Emisor Rfc="WATM640917J45" Nombre="MARIA WATEMBER TORRES" RegimenFiscal="612" />
+  <cfdi:Receptor Rfc="EKU9003173C9" Nombre="ESCUELA KEMPER URGATE" DomicilioFiscalReceptor="42501" RegimenFiscalReceptor="999" UsoCFDI="Z99" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="80101500" Cantidad="10" ClaveUnidad="ZZ9" Unidad="Hora" Descripcion="Asesoría en administración corporativa" ValorUnitario="850.00" Importe="8500.00" Descuento="100.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="8400.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1344.00" />
+        </cfdi:Traslados>
+        <cfdi:Retenciones>
+          <cfdi:Retencion Base="8400.00" Impuesto="001" TipoFactor="Tasa" TasaOCuota="0.100000" Importe="840.00" />
+          <cfdi:Retencion Base="8400.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.106667" Importe="896.0028" />
+        </cfdi:Retenciones>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="81111500" NoIdentificacion="SW-01" Cantidad="1" ClaveUnidad="E48" Unidad="Unidad de servicio" Descripcion="Configuración de software" ValorUnitario="2500.50" Importe="2500.50" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="2500.50" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="43231500" Cantidad="2" ClaveUnidad="H87" Unidad="Pieza" Descripcion="Manual impreso" ValorUnitario="99.99" Importe="199.98" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="199.98" Impuesto="002" TipoFactor="Exento" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosRetenidos="1736.00" TotalImpuestosTrasladados="1344.00">
+    <cfdi:Retenciones>
+      <cfdi:Retencion Impuesto="001" Importe="840.00" />
+      <cfdi:Retencion Impuesto="002" Importe="896.00" />
+    </cfdi:Retenciones>
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="2500.50" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00" />
+      <cfdi:Traslado Base="8400.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1344.00" />
+      <cfdi:Traslado Base="199.98" Impuesto="002" TipoFactor="Exento" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+</cfdi:Comprobante>
