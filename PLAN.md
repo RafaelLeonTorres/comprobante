@@ -453,11 +453,13 @@ La plantilla, de arriba abajo (hoja carta, márgenes de 12 mm, la identidad de l
 
 ### Fase 7. Cierre para el portafolio
 - [x] README con descripción, capturas, diagrama, decisiones técnicas y cómo actualizar los archivos del SAT (con la función del PDF, la licencia de QuestPDF y sus capturas).
-- [ ] Artículo en el sitio, en `_posts/es` y `_posts/en`, con `repo` en el front matter.
-- [ ] En `_data/projects.yml`, agregar al proyecto `url`, `status: done` y `post`.
-- [ ] Decidir si hay demo pública (sección 14).
+- [x] Artículo en el sitio, en `_posts/es` y `_posts/en`, con `repo` en el front matter: `como-funciona-comprobante` y `how-comprobante-works` (mismo `ref`), con cuatro capturas en WebP. Está en la rama `proyecto-comprobante` del sitio.
+- [x] En `_data/projects.yml`, agregar al proyecto `url`, `status: done` y `post`.
+- [ ] Decidir si hay demo pública (sección 14). La decisión es del dueño del proyecto; el artículo y el README dicen hoy que se corre con Docker en local.
 
 **Entregable:** el proyecto aparece terminado en el sitio, con su artículo y el enlace al código.
+
+**Verificado:** `bundle exec jekyll build` con el Gemfile del sitio (`github-pages`, Jekyll 3.10 y Liquid 4.0.4, el motor de GitHub Pages) termina sin errores. Las dos páginas salen con sus cuatro imágenes, sus 22 bloques de código, con el HTML de Angular y sus llaves dobles intacto (Liquid no lo toca), y la portada enlaza el título al artículo y «Código» al repositorio, igual que Mediateca. `npm test` y `npm run check` del sitio solo cubren el laboratorio, así que este cambio no los toca. Falta subir la rama y unirla a `main` (lo hace el dueño del proyecto).
 
 ### Extensiones (después del MVP)
 - [ ] Complemento de Pagos 2.0: generar y validar.
