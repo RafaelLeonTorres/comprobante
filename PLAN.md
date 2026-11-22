@@ -231,7 +231,7 @@ Un complemento que la app no trae en sus esquemas (Pagos, Nómina, Comercio Exte
 
 | Ruta | Pantalla |
 |---|---|
-| `/` | Qué hace, el aviso de que no timbra y los dos caminos: generar o validar |
+| `/` | Qué hace, el aviso de que no timbra, los tres caminos (generar, validar o consultar los catálogos) y el estado del servicio |
 | `/generar` | Formulario por secciones (comprobante, emisor de prueba, receptor, conceptos con sus impuestos), con buscadores de catálogos y totales en vivo. Al generar: XML con resaltado, cadena original, sello, certificado, resultado de la validación y "Descargar XML" |
 | `/validar` | Soltar o elegir un XML. Reporte con los hallazgos agrupados por nodo y con su código del SAT, la cadena original y el estado del sello |
 | `/catalogos` | Buscador de claves y fecha de la versión de los catálogos |
@@ -304,7 +304,7 @@ Prácticas, las mismas que en Mediateca:
 
 Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase 0 se trabaja con ramas y pull requests.
 
-**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) y la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`). Van 355 pruebas unitarias y 50 de integración. Lo siguiente: la fase 4 (Angular para generar y validar).
+**Dónde vamos (21 de noviembre de 2026).** Hechas la fase 0 (backend, archivos del SAT, Angular, Docker Compose y CI; `docker compose up -d --build --wait` levanta los tres contenedores en unos 35 s con la base vacía), la fase 1 (importador, catálogos en PostgreSQL con EF Core, cálculo con los límites del Anexo 20 y `POST /api/comprobantes/calculo`), la fase 2 (XML, cadena original y sello: `POST /api/comprobantes` entrega el CFDI sellado con un CSD de prueba, que pasa el XSD y cuyo sello verifica) la fase 3 (el validador: `POST /api/validaciones` aplica el esquema, las reglas de la matriz de errores y el sello; 103 de las 129 reglas se revisan completas, 5 en parte y 21 no, con su motivo en `GET /api/validaciones/reglas`) y la fase 4 (Angular: desde el navegador se genera un CFDI con totales en vivo, se descarga, se valida con su reporte por nodo y se consultan los catálogos; probado a mano en escritorio, en una ventana de 782 px y en celular, en claro y oscuro). Van 355 pruebas unitarias y 50 de integración en el backend y 201 con Vitest en el frontend. Lo siguiente: la fase 5 (seguridad y pulido).
 
 ### Fase 0. Base del proyecto
 - [x] Confirmar las decisiones de la sección 14.
@@ -348,17 +348,18 @@ Cada fase entrega algo que funciona de punta a punta, con pruebas. Desde la fase
 **Entregable:** un XML con errores sembrados devuelve cada error con su código, nodo y mensaje.
 
 ### Fase 4. Angular: generar y validar
-- [ ] Generador con Signal Forms, buscadores de catálogos y totales en vivo; resultado con XML, cadena original, sello y descarga.
-- [ ] Validador con arrastrar y soltar, y reporte por nodo.
-- [ ] Ejemplos precargados.
-- [ ] Pruebas con Vitest y revisión en el navegador, en escritorio y en el celular.
+- [x] Generador con Signal Forms, buscadores de catálogos y totales en vivo; resultado con XML, cadena original, sello y descarga. Lleva el comprobante, el emisor de prueba, el receptor, la información global (público en general), los CFDI relacionados y los conceptos con sus impuestos; los errores de la API caen sobre el campo que corresponde y el foco pasa al aviso o al resultado.
+- [x] Validador con arrastrar y soltar (también elegir o pegar el XML) y reporte por nodo, con el código de la matriz, lo encontrado y lo esperado, y un salto a la línea del XML. Incluye la tabla de las reglas que revisa y las que no.
+- [x] Ejemplos precargados: cinco para generar (servicio con IVA, retenciones y descuento, dólares, público en general y egreso con relacionado) y dos para validar (uno sin errores y otro con cinco).
+- [x] Pantalla de catálogos: los 19 catálogos con su número de filas, búsqueda por clave o descripción, paginación y una URL que se puede compartir (`?catalogo=…&q=…&pagina=…`).
+- [x] Pruebas con Vitest (201 en 21 archivos) y revisión en el navegador, en escritorio (1280 px), en una ventana de 782 px y en celular (375 px), en claro y oscuro. La revisión encontró y corrigió: ayudas cortadas en los campos, un renglón de descuento vacío (la API omite los valores nulos), impuestos mal acomodados al apilarse, una línea larga de XML que ensanchaba la página, títulos de resultado mal redactados y el anillo de foco de Material, que viene apagado.
 
-**Entregable:** desde el navegador se genera un CFDI, se descarga y, al volver a validarlo, no tiene hallazgos.
+**Entregable:** desde el navegador se genera un CFDI, se descarga y, al volver a validarlo, no tiene hallazgos. Verificado con los cinco ejemplos contra la API real (la descarga, sin guardar el archivo: nombre, tipo, tamaño y sello) y con uno de ellos subido a la pantalla Validar.
 
 ### Fase 5. Seguridad y pulido
 - [ ] Límites de tamaño y de solicitudes, cabeceras de nginx y registros sin contenido.
 - [ ] Pruebas de integración de seguridad: XXE, 413, 415 y 429.
-- [ ] Revisión de accesibilidad y del modo oscuro.
+- [ ] Revisión de accesibilidad y del modo oscuro. Adelantada en la fase 4 y verificada por código en el navegador: contraste AA de todo el texto en las cuatro pantallas, en claro y oscuro; anillo de foco visible en todos los controles de las cuatro pantallas; nombres accesibles, títulos sin saltos y regiones; enlace del pie con blanco de pulsación de 24 px. Falta probar con un lector de pantalla.
 
 **Entregable:** las pruebas de seguridad pasan en la CI y la app se usa con teclado y lector de pantalla.
 
